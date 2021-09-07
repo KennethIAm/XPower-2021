@@ -21,6 +21,7 @@ namespace WebApiPrototype
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls("https://10.108.130.232:5001", "http://10.108.130.232:5000");
                 });
     }
 }
