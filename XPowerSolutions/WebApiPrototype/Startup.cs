@@ -27,10 +27,19 @@ namespace WebApiPrototype
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers();
+            services.AddControllers()
+                .AddXmlSerializerFormatters()
+                .AddJsonOptions(o => o.JsonSerializerOptions.PropertyNamingPolicy = null);
+                
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiPrototype", Version = "v1" });
+            });
+
+            services.AddCors(policy =>
+            {
+                policy.AddPolicy("PrototypePolicy", p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
             });
         }
 
@@ -44,11 +53,13 @@ namespace WebApiPrototype
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApiPrototype v1"));
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseCors("PrototypePolicy");
 
             app.UseEndpoints(endpoints =>
             {
