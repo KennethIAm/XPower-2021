@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WebApiPrototype
+namespace WebBlazorServerHub
 {
     public class Program
     {
@@ -21,7 +21,7 @@ namespace WebApiPrototype
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls("http://10.108.130.212:5000");
+                    webBuilder.UseUrls("http://10.108.130.212:5002");
                 });
     }
 }
