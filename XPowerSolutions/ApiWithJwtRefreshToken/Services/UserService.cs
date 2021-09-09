@@ -10,14 +10,16 @@ using Microsoft.IdentityModel.Tokens;
 using ApiWithJwtRefreshToken.Models;
 using ApiWithJwtRefreshToken.Entities;
 using ApiWithJwtRefreshToken.Helpers;
+using XPowerAPI.Models;
 
 namespace ApiWithJwtRefreshToken.Services
 {
     public interface IUserService
     {
-        AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress);
-        AuthenticateResponse RefreshToken(string token, string ipAddress);
-        bool RevokeToken(string token, string ipAddress);
+        bool CreateUser(string email, string username, string password);
+        AuthenticateResponse Authenticate(AuthenticateRequest model, string email);
+        AuthenticateResponse RefreshToken(string token, string email);
+        bool RevokeToken(string token, string email);
         IEnumerable<User> GetAll();
         User GetById(int id);
     }
@@ -35,16 +37,28 @@ namespace ApiWithJwtRefreshToken.Services
             _appSettings = appSettings.Value;
         }
 
-        public AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress)
+        public bool CreateUser(string email, string username, string password)
         {
-            var user = _context.Users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+            CreateUserRequest createUserRequest = new CreateUserRequest();
+            createUserRequest.Email = email;
+            createUserRequest.Username = username;
+            createUserRequest.Password = password;
+
+
+
+            return createUserRequest;
+        }
+
+        public AuthenticateResponse Authenticate(AuthenticateRequest model, string email)
+        {
+            var user = _context.Users.SingleOrDefault(x => x.Email == model.Email && x.Password == model.Password);
 
             // return null if user not found
             if (user == null) return null;
 
             // authentication successful so generate jwt and refresh tokens
             var jwtToken = generateJwtToken(user);
-            var refreshToken = generateRefreshToken(ipAddress);
+            var refreshToken = generateRefreshToken(email);
 
             // save refresh token
             user.RefreshTokens.Add(refreshToken);
@@ -54,7 +68,7 @@ namespace ApiWithJwtRefreshToken.Services
             return new AuthenticateResponse(user, jwtToken, refreshToken.Token);
         }
 
-        public AuthenticateResponse RefreshToken(string token, string ipAddress)
+        public AuthenticateResponse RefreshToken(string token, string email)
         {
             var user = _context.Users.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
 
@@ -67,9 +81,9 @@ namespace ApiWithJwtRefreshToken.Services
             if (!refreshToken.IsActive) return null;
 
             // replace old refresh token with a new one and save
-            var newRefreshToken = generateRefreshToken(ipAddress);
+            var newRefreshToken = generateRefreshToken(email);
             refreshToken.Revoked = DateTime.UtcNow;
-            refreshToken.RevokedByIp = ipAddress;
+            refreshToken.RevokedByEmail = email;
             refreshToken.ReplacedByToken = newRefreshToken.Token;
             user.RefreshTokens.Add(newRefreshToken);
             _context.Update(user);
@@ -81,7 +95,7 @@ namespace ApiWithJwtRefreshToken.Services
             return new AuthenticateResponse(user, jwtToken, newRefreshToken.Token);
         }
 
-        public bool RevokeToken(string token, string ipAddress)
+        public bool RevokeToken(string token, string email)
         {
             var user = _context.Users.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
             var tokens = _context.Users.ToList();
@@ -95,7 +109,7 @@ namespace ApiWithJwtRefreshToken.Services
 
             // revoke token and save
             refreshToken.Revoked = DateTime.UtcNow;
-            refreshToken.RevokedByIp = ipAddress;
+            refreshToken.RevokedByEmail = email;
             _context.Update(user);
             _context.SaveChanges();
 
@@ -131,7 +145,7 @@ namespace ApiWithJwtRefreshToken.Services
             return tokenHandler.WriteToken(token);
         }
 
-        private RefreshToken generateRefreshToken(string ipAddress)
+        private RefreshToken generateRefreshToken(string email)
         {
             using (var rngCryptoServiceProvider = new RNGCryptoServiceProvider())
             {
@@ -142,7 +156,7 @@ namespace ApiWithJwtRefreshToken.Services
                     Token = Convert.ToBase64String(randomBytes),
                     Expires = DateTime.UtcNow.AddDays(7),
                     Created = DateTime.UtcNow,
-                    CreatedByIp = ipAddress
+                    CreatedByEmail = email
                 };
             }
         }

@@ -17,24 +17,37 @@ namespace ApiWithJwtRefreshToken.Controllers
             public UsersController(IUserService userService)
             {
                 _userService = userService;
-            }
+        }
 
-            [AllowAnonymous]
-            [HttpPost("authenticate")]
-            public IActionResult Authenticate([FromBody] AuthenticateRequest model)
-            {
-                var response = _userService.Authenticate(model, ipAddress());
+        [AllowAnonymous]
+        [HttpPost("CreateUser")]
+        public IActionResult CreateUser(string email, string username, string password)
+        {
+            var response = _userService.CreateUser(email, username, password);
 
-                if (response == null)
-                    return BadRequest(new { message = "Username or password is incorrect" });
+            if (response == null)
+                return BadRequest(new { message = "Username or password is incorrect" });
 
-                setTokenCookie(response.RefreshToken);
 
-                return Ok(response);
-            }
+            return Ok(response);
+        }
 
-            [AllowAnonymous]
-            [HttpPost("refresh-token")]
+        [AllowAnonymous]
+        [HttpPost("Authenticate")]
+        public IActionResult Authenticate([FromBody] AuthenticateRequest model)
+        {
+            var response = _userService.Authenticate(model, ipAddress());
+
+            if (response == null)
+                return BadRequest(new { message = "Username or password is incorrect" });
+
+            setTokenCookie(response.RefreshToken);
+
+            return Ok(response);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("RefreshToken")]
             public IActionResult RefreshToken()
             {
                 var refreshToken = Request.Cookies["refreshToken"];
@@ -48,7 +61,7 @@ namespace ApiWithJwtRefreshToken.Controllers
                 return Ok(response);
             }
 
-            [HttpPost("revoke-token")]
+            [HttpPost("RevokeToken")]
             public IActionResult RevokeToken([FromBody] RevokeTokenRequest model)
             {
                 // accept token from request body or cookie
@@ -82,7 +95,7 @@ namespace ApiWithJwtRefreshToken.Controllers
                 return Ok(user);
             }
 
-            [HttpGet("{id}/refresh-tokens")]
+            [HttpGet("{id}/Refresh-Tokens")]
             public IActionResult GetRefreshTokens(int id)
             {
                 var user = _userService.GetById(id);
