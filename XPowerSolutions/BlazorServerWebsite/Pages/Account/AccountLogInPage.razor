@@ -1,0 +1,30 @@
+﻿@page "/account/login"
+<div id="content" class="position-absolute top-50 start-50 translate-middle">
+    <div class="card w-100 bg-primary">
+        <div class="card-body">
+            <h2 class="text-uppercase text-center pb-3">log ind</h2>
+
+            <form>
+                <div class="mb-3">
+                    <label for="inputEmail" class="fs-6">Email addresse :</label>
+                    <input type="email" class="form-control form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="example@email.dk">
+                </div>
+
+                <div class="mb-3">
+                    <label for="inputPassword">Adgangskode :</label>
+                    <input type="password" class="form-control form-control" id="inputPassword" placeholder="●●●●●●●●●●●●●●">
+                </div>
+
+                <div class="d-flex justify-content-between py-3">
+                    <button type="submit" class="btn btn-light btn-sm">Log ind</button>
+                    <a href="/account/register" class="btn btn-light btn-sm">Opret bruger</a>
+                </div>
+
+            </form>
+
+            <p class="text-center g-0 m-0">
+                <a href="#forgot-password" class="text-white text-decoration-none">Glemt adgangskode?</a>
+            </p>
+        </div>
+    </div>
+</div>
