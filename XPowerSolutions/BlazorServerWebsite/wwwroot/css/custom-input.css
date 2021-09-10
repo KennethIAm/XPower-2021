@@ -30,7 +30,7 @@
 
     .form-control:focus {
         color: var(--clr-primary);
-        background-color: var(--clr-bg-secondary) !important;
+        background-color: var(--clr-bg-secondary-rgb) !important;
         border-color: var(--clr-primary) !important;
         box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%) !important;
     }

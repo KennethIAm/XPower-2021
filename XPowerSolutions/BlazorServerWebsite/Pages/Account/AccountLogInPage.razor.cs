@@ -12,6 +12,7 @@ namespace BlazorServerWebsite.Pages.Account
     {
         private AccountLogInModel _model;
         private EditContext _editContext;
+        private string _message = string.Empty;
 
         protected override async Task OnInitializedAsync()
         {
@@ -23,6 +24,8 @@ namespace BlazorServerWebsite.Pages.Account
         private async Task OnValidForm_AuthenticateAccountLogInAsync()
         {
             Console.WriteLine($"EMail: {_model.EmailAddress, -10} | {_model.Password, -10}");
+
+            _message = "Account logged in!";
 
             InitializeNewContext();
 
