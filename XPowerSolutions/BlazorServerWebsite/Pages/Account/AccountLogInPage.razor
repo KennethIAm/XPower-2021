@@ -6,7 +6,7 @@
 
             <EditForm EditContext="_editContext" OnValidSubmit="OnValidForm_AuthenticateAccountLogInAsync">
                 <div class="mb-3">
-                    <label for="inputEmail" class="fs-6 text-light">Email adresse :</label>
+                    <label for="inputEmail" class="fs-6 text-light">E-mailadresse :</label>
                     <InputText  @bind-Value="_model.EmailAddress" DisplayName="EmailAddress" id="inputEmail" type="email" class="form-control form-control" aria-describedby="emailHelp" placeholder="example@email.dk" />
                     <ValidationMessage For="() => _model.EmailAddress" />
                 </div>

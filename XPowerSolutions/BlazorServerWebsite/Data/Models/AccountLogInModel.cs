@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace BlazorServerWebsite.Data.Models
 {
     public class AccountLogInModel
     {
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Indtast venligst en gyldig email adresse.")]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Indtast venligst en gyldig e-mailadresse.")]
         public string EmailAddress { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Indtast venglist legitimationsoplysninger.")]
