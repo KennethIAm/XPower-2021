@@ -1,3 +1,13 @@
-﻿root {
-
+﻿:root {
+    --ff-primary: "Open Sans", Helvetica, Arial, sans-serif;
+    --clr-primary: #445878;
+    --clr-secondary: #FFF;
+    --clr-danger: #FF3823;
+    --clr-success: #72BB53;
+    --clr-light: #F7F6F6;
+    --clr-bg-primary-rgb: rgb(68 88 120);
+    --clr-bg-primary-25-rgb: rgb(68 88 120 / 25%);
+    --clr-bg-secondary: rgb(255 255 255);
+    --clr-bg-light-rgb: rgb(247 246 246);
+    --clr-placeholder-rgb: rgb(68 88 120 / 75%);
 }

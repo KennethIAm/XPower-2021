@@ -4,23 +4,24 @@
         <div class="card-body">
             <h2 class="text-uppercase text-center pb-3">log ind</h2>
 
-            <form>
+            <EditForm EditContext="_editContext" OnValidSubmit="OnValidForm_AuthenticateAccountLogInAsync">
                 <div class="mb-3">
-                    <label for="inputEmail" class="fs-6">Email addresse :</label>
-                    <input type="email" class="form-control form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="example@email.dk">
+                    <label for="inputEmail" class="fs-6 text-light">Email adresse :</label>
+                    <InputText  @bind-Value="_model.EmailAddress" DisplayName="EmailAddress" id="inputEmail" type="email" class="form-control form-control" aria-describedby="emailHelp" placeholder="example@email.dk" />
+                    <ValidationMessage For="() => _model.EmailAddress" />
                 </div>
 
                 <div class="mb-3">
-                    <label for="inputPassword">Adgangskode :</label>
-                    <input type="password" class="form-control form-control" id="inputPassword" placeholder="●●●●●●●●●●●●●●">
+                    <label for="inputPassword text-light">Adgangskode :</label>
+                    <InputText @bind-Value="_model.Password" DisplayName="Password" id="inputPassword" type="password" class="form-control form-control" placeholder="●●●●●●●●●●●●●●" />
+                    <ValidationMessage For="() => _model.Password" />
                 </div>
 
                 <div class="d-flex justify-content-between py-3">
                     <button type="submit" class="btn btn-light btn-sm">Log ind</button>
                     <a href="/account/register" class="btn btn-light btn-sm">Opret bruger</a>
                 </div>
-
-            </form>
+            </EditForm>
 
             <p class="text-center g-0 m-0">
                 <a href="#forgot-password" class="text-white text-decoration-none">Glemt adgangskode?</a>

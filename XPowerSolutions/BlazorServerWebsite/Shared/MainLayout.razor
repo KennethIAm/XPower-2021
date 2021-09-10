@@ -1,8 +1,8 @@
 ﻿@inherits LayoutComponentBase
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<nav class="navbar navbar-expand-lg bg-primary">
     <div class="container-fluid mx-3">
-        <NavLink Match="NavLinkMatch.All" class="navbar-brand fw-bold fs-4" href="/">XPower Solutions</NavLink>
+        <NavLink Match="NavLinkMatch.All" class="navbar-brand fw-bold fs-4 text-light" href="/">XPower Solutions</NavLink>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -11,7 +11,7 @@
             <span class="navbar-text d-flex float-end ms-auto">
                 <AuthorizeView>
                     <NotAuthorized>
-                        <NavLink Match="NavLinkMatch.All" href="/account/login" class="text-decoration-none fw-bold fs-5">Log ind</NavLink>
+                        <NavLink Match="NavLinkMatch.All" href="/account/login" class="text-decoration-none text-light fw-bold fs-5">Log ind</NavLink>
                     </NotAuthorized>
                 </AuthorizeView>
             </span>

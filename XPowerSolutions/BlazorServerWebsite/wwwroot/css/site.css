@@ -1,16 +1,29 @@
-@import url('_root.css');
+@import url(_root.css);
+@import url(custom-input.css);
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
 html, body {
-    font-family: 'Open Sans', Helvetica, Arial, sans-serif;
-    background-color: #f7f6f6;
+    font-family: var(--ff-primary);
+    background-color: var(--clr-bg-secondary-rgb);
+}
+
+.bg-primary {
+    background-color: var(--clr-bg-primary-rgb) !important;
+}
+
+.text-light {
+    color: var(--clr-light) !important;
 }
 
 h2 {
-    font-family: 'Open Sans', Helvetica, Arial, sans-serif;
-    font-size: 40px;
+    font-size: 2.5rem;
     font-weight: bold;
-    color: #fff;
+    color: var(--clr-light);
+}
+
+form label {
+    color: var(--clr-secondary);
+    padding: 0 0 .75rem 0;
 }
 
 a {
@@ -28,7 +41,7 @@ a {
         height: 2px !important;
         bottom: 0 !important;
         left: 0 !important;
-        background-color: #fff !important;
+        background-color: var(--clr-bg-light-rgb) !important;
         visibility: hidden !important;
         transform: scaleX(0) !important;
         transition: all 0.3s ease-in-out 0s !important;
@@ -40,43 +53,22 @@ a {
     }
 
 
-a.active::before {
-    content: "" !important;
-    position: absolute !important;
-    width: 80% !important;
-    height: 2px !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    background-color: #fff !important;
-    visibility: visible !important;
-    transform: scaleX(1) !important;
-    transition: all 0.3s ease-in-out 0s !important;
-}
+    a.active::before {
+        content: "" !important;
+        position: absolute !important;
+        width: 80% !important;
+        height: 2px !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        background-color: var(--clr-bg-light-rgb) !important;
+        visibility: visible !important;
+        transform: scaleX(1) !important;
+        transition: all 0.3s ease-in-out 0s !important;
+    }
 
-a.active {
-    color: #fff !important;
-}
-
-.bg-primary {
-    background-color: rgba(68, 88, 120, 1) !important;
-}
-
-form label {
-    color: #fff;
-    padding: 0 0 .75rem 0;
-}
-
-.valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
-}
-
-.invalid {
-    outline: 1px solid red;
-}
-
-.validation-message {
-    color: red;
-}
+    a.active {
+        color: var(--clr-light) !important;
+    }
 
 #blazor-error-ui {
     background: lightyellow;
