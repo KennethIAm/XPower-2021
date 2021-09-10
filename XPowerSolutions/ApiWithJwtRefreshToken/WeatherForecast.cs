@@ -1,6 +1,6 @@
 using System;
 
-namespace ApiWithJwtRefreshToken
+namespace XPowerAPI
 {
     public class WeatherForecast
     {

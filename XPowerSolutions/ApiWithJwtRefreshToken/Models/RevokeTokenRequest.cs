@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ApiWithJwtRefreshToken.Models
+namespace XPowerAPI.Models
 {
     public class RevokeTokenRequest
     {

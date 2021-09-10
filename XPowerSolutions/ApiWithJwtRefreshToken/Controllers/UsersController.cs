@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using ApiWithJwtRefreshToken.Services;
-using ApiWithJwtRefreshToken.Models;
+using XPowerAPI.Services;
+using XPowerAPI.Models;
 using Microsoft.AspNetCore.Http;
 using System;
 
-namespace ApiWithJwtRefreshToken.Controllers
+namespace XPowerAPI.Controllers
     {
         [Authorize]
         [ApiController]
@@ -17,6 +17,20 @@ namespace ApiWithJwtRefreshToken.Controllers
             public UsersController(IUserService userService)
             {
                 _userService = userService;
+            }
+
+            [AllowAnonymous]
+            [HttpPost("create-user")]
+           public IActionResult CreateUser([FromBody] AuthenticateRequest model)
+            {
+                var response = _userService.Authenticate(model, ipAddress());
+
+                if (response == null)
+                    return BadRequest(new { message = "Username or password is incorrect" });
+
+                setTokenCookie(response.RefreshToken);
+
+                return Ok(response);
             }
 
             [AllowAnonymous]
@@ -63,32 +77,6 @@ namespace ApiWithJwtRefreshToken.Controllers
                     return NotFound(new { message = "Token not found" });
 
                 return Ok(new { message = "Token revoked" });
-            }
-
-            [HttpGet]
-            [Route("TestAll")]
-            public IActionResult GetAll()
-            {
-                var users = _userService.GetAll();
-                return Ok(users);
-            }
-
-            [HttpGet("{id}")]
-            public IActionResult GetById(int id)
-            {
-                var user = _userService.GetById(id);
-                if (user == null) return NotFound();
-
-                return Ok(user);
-            }
-
-            [HttpGet("{id}/refresh-tokens")]
-            public IActionResult GetRefreshTokens(int id)
-            {
-                var user = _userService.GetById(id);
-                if (user == null) return NotFound();
-
-                return Ok(user.RefreshTokens);
             }
 
             // helper methods

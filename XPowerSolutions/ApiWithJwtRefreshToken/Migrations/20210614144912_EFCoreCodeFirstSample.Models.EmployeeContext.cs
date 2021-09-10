@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace ApiWithJwtRefreshToken.Migrations
+namespace XPowerAPI.Migrations
 {
     public partial class EFCoreCodeFirstSampleModelsEmployeeContext : Migration
     {

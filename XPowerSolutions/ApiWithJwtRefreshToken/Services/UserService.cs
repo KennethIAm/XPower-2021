@@ -7,19 +7,19 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using ApiWithJwtRefreshToken.Models;
-using ApiWithJwtRefreshToken.Entities;
-using ApiWithJwtRefreshToken.Helpers;
+using XPowerAPI.Models;
+using XPowerAPI.Entities;
+using XPowerAPI.Helpers;
+using XPowerAPI.Models;
 
-namespace ApiWithJwtRefreshToken.Services
+namespace XPowerAPI.Services
 {
     public interface IUserService
     {
+        IUser CreateUser(CreateUserRequest request);
         AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress);
         AuthenticateResponse RefreshToken(string token, string ipAddress);
         bool RevokeToken(string token, string ipAddress);
-        IEnumerable<User> GetAll();
-        User GetById(int id);
     }
 
     public class UserService : IUserService
@@ -35,9 +35,14 @@ namespace ApiWithJwtRefreshToken.Services
             _appSettings = appSettings.Value;
         }
 
+        public IUser CreateUser(CreateUserRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
         public AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress)
         {
-            var user = _context.Users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+            var user = _context.Users.SingleOrDefault(x => x.Email == model.Email && x.Password == model.Password);
 
             // return null if user not found
             if (user == null) return null;
@@ -100,16 +105,6 @@ namespace ApiWithJwtRefreshToken.Services
             _context.SaveChanges();
 
             return true;
-        }
-
-        public IEnumerable<User> GetAll()
-        {
-            return _context.Users;
-        }
-
-        public User GetById(int id)
-        {
-            return _context.Users.Find(id);
         }
 
         // helper methods

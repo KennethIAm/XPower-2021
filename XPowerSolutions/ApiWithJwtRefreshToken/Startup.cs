@@ -2,16 +2,16 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ApiWithJwtRefreshToken.Helpers;
-using ApiWithJwtRefreshToken.Services;
+using XPowerAPI.Helpers;
+using XPowerAPI.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using ApiWithJwtRefreshToken.Entities;
+using XPowerAPI.Entities;
 using System;
 
-namespace ApiWithJwtRefreshToken
+namespace XPowerAPI
 {
     public class Startup
     {

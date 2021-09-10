@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ApiWithJwtRefreshToken.Entities;
+using XPowerAPI.Entities;
 
-namespace ApiWithJwtRefreshToken.Helpers
+namespace XPowerAPI.Helpers
 {
     public class DataContext : DbContext
     {

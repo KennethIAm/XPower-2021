@@ -1,14 +1,20 @@
 ﻿using System.Text.Json.Serialization;
 using System.Collections.Generic;
 
-namespace ApiWithJwtRefreshToken.Entities
+namespace XPowerAPI.Entities
 {
-    public class User
+    public interface IUser
+    {
+        int Id { get; set; }
+        string Email { get; set; }
+        string Password { get; set; }
+        List<RefreshToken> RefreshTokens { get; set; }
+    }
+
+    public class User : IUser
     {
         public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Username { get; set; }
+        public string Email { get; set; }
 
         [JsonIgnore]
         public string Password { get; set; }

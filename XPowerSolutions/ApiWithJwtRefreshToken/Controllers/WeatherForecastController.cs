@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ApiWithJwtRefreshToken.Controllers
+namespace XPowerAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]

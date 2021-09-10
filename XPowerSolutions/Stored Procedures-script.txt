@@ -1,0 +1,11 @@
+--Create User
+CREATE PROCEDURE CreateUser 
+				@Email nvarchar(255), 
+				@Password nvarchar(255)
+AS
+INSERT INTO Users 
+				(Email, Password) 
+				VALUES 
+				(@Email, @Password)
+SELECT * FROM Users WHERE Email = @Email;
+GO
