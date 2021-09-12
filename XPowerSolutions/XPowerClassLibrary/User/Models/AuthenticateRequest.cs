@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ApiWithJwtRefreshToken.Models
+namespace H4_TrashPlusPlus.Models
 {
     public class AuthenticateRequest
     {
@@ -13,5 +13,6 @@ namespace ApiWithJwtRefreshToken.Models
 
         [Required]
         public string Password { get; set; }
+
     }
 }

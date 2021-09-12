@@ -1,25 +1,26 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore;
+﻿using Dapper.Contrib.Extensions;
+using System;
 
-namespace ApiWithJwtRefreshToken.Entities
+namespace H4_TrashPlusPlus.Entities
 {
-    [Owned]
+    [Table("RefreshToken")]
     public class RefreshToken
     {
-        [Key]
-        [JsonIgnore]
         public int Id { get; set; }
+        public int UserId { get; set; }
 
         public string Token { get; set; }
         public DateTime Expires { get; set; }
-        public bool IsExpired => DateTime.UtcNow >= Expires;
         public DateTime Created { get; set; }
         public string CreatedByIp { get; set; }
         public DateTime? Revoked { get; set; }
         public string RevokedByIp { get; set; }
         public string ReplacedByToken { get; set; }
+
+        [Write(false)]
+        public bool IsExpired => DateTime.UtcNow >= Expires;
+        
+        [Write(false)]
         public bool IsActive => Revoked == null && !IsExpired;
     }
 }

@@ -2,16 +2,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ApiWithJwtRefreshToken.Helpers;
-using ApiWithJwtRefreshToken.Services;
+using XPowerAPI.Helpers;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using ApiWithJwtRefreshToken.Entities;
 using System;
+using XPowerClassLibrary.Users;
 
-namespace ApiWithJwtRefreshToken
+namespace XPowerAPI
 {
     public class Startup
     {
@@ -25,10 +23,6 @@ namespace ApiWithJwtRefreshToken
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // in memory database used for simplicity, change to a real db for production applications
-            //services.AddDbContext<DataContext>(options => options.UseSqlServer(Configuration.GetConnectionString("StreamingTinderDB")));
-            services.AddDbContext<DataContext>(options => options.UseInMemoryDatabase("TestDb"));
-
             services.AddCors();
             services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.IgnoreNullValues = true);
 
@@ -60,17 +54,12 @@ namespace ApiWithJwtRefreshToken
             });
 
             // configure DI for application services
-            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserService, UserService>(x => (UserService)UserServiceFactory.GetUserServiceDB());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext context)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // add hardcoded test user to db on startup,  
-            // plain text password is used for simplicity, hashed passwords should be used in production applications
-            context.Users.Add(new User { FirstName = "Test", LastName = "User", Username = "test", Password = "test" });
-            context.SaveChanges();
-
             app.UseRouting();
 
             // global cors policy
