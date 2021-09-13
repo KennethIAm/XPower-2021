@@ -9,11 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "prototypes", "prototypes", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebBlazorServerHub", "WebBlazorServerHub\WebBlazorServerHub.csproj", "{F5EE3D16-C475-449E-8A63-A0BC742D0F82}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPowerAPI", "ApiWithJwtRefreshToken\XPowerAPI.csproj", "{2F3E3640-DA16-41C0-9472-0EF3648310B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPowerClassLibrary", "XPowerClassLibrary\XPowerClassLibrary.csproj", "{453376A3-C495-4420-BA53-707EA03D47D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPowerClassLibrary", "XPowerClassLibrary\XPowerClassLibrary.csproj", "{453376A3-C495-4420-BA53-707EA03D47D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPowerClassLibraryTests", "XPowerClassLibraryTests\XPowerClassLibraryTests.csproj", "{7A8BFC0B-2CFE-4EF1-BD35-55F0D5B814C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPowerClassLibraryTests", "XPowerClassLibraryTests\XPowerClassLibraryTests.csproj", "{7A8BFC0B-2CFE-4EF1-BD35-55F0D5B814C7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPowerAPI", "XPowerAPI\XPowerAPI.csproj", "{58AD85AF-EBD9-40C7-80E4-15501012ED54}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,6 @@ Global
 		{F5EE3D16-C475-449E-8A63-A0BC742D0F82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5EE3D16-C475-449E-8A63-A0BC742D0F82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5EE3D16-C475-449E-8A63-A0BC742D0F82}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2F3E3640-DA16-41C0-9472-0EF3648310B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F3E3640-DA16-41C0-9472-0EF3648310B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2F3E3640-DA16-41C0-9472-0EF3648310B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2F3E3640-DA16-41C0-9472-0EF3648310B7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{453376A3-C495-4420-BA53-707EA03D47D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{453376A3-C495-4420-BA53-707EA03D47D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{453376A3-C495-4420-BA53-707EA03D47D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -41,6 +37,10 @@ Global
 		{7A8BFC0B-2CFE-4EF1-BD35-55F0D5B814C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A8BFC0B-2CFE-4EF1-BD35-55F0D5B814C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A8BFC0B-2CFE-4EF1-BD35-55F0D5B814C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58AD85AF-EBD9-40C7-80E4-15501012ED54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58AD85AF-EBD9-40C7-80E4-15501012ED54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58AD85AF-EBD9-40C7-80E4-15501012ED54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58AD85AF-EBD9-40C7-80E4-15501012ED54}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
