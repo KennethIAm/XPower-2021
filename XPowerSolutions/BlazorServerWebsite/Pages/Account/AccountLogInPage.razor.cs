@@ -46,7 +46,7 @@ namespace BlazorServerWebsite.Pages.Account
             var jsonRequest = new StringContent(
                 JsonSerializer.Serialize(authRequest), Encoding.UTF8, "application/json");
 
-            var result = await _client.PostAsync("/user/Authenticate", jsonRequest);
+            var result = await _client.PostAsync(_requestMessage.RequestUri, jsonRequest);
 
             if (result.IsSuccessStatusCode)
             {
