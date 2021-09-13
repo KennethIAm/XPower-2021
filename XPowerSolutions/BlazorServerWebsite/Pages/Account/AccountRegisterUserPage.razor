@@ -1,17 +1,17 @@
 ﻿@page "/account/register"
-@layout LogInLayout
+@layout CleanNavbarLayout
 
 <div id="content" class="position-absolute top-50 start-50 translate-middle">
     <div class="card w-100 bg-primary">
         <div class="card-body">
-            <h2 class="text-uppercase text-center pb-3">log ind</h2>
+            <h2 class="text-uppercase text-center pb-3">Opret bruger</h2>
 
             @if (!string.IsNullOrEmpty(_message))
             {
                 <DisplayAlertMessage Message="@_message" AlertType="AlertType.Default" ClearMessageInMilliseconds="3000" />
             }
 
-            <EditForm EditContext="_editContext" OnValidSubmit="OnValidForm_AuthenticateAccountLogInAsync">
+            <EditForm EditContext="_editContext" OnValidSubmit="OnValidForm_AuthenticateAccountRegisterAsync">
                 <div class="mb-3">
                     <label for="inputEmail" class="fs-6 text-light">E-mailadresse :</label>
                     <InputText @bind-Value="_model.EmailAddress" DisplayName="EmailAddress" id="inputEmail" type="email" class="form-control form-control" aria-describedby="emailHelp" placeholder="example@email.dk" />
@@ -25,8 +25,8 @@
                 </div>
 
                 <div class="d-flex justify-content-between py-3">
-                    <button type="submit" class="btn btn-outline-success btn-sm">Log ind</button>
-                    <NavigateToAccountRegister />
+                    <button type="submit" class="btn btn-outline-success btn-sm">Opret bruger</button>
+                    <DynamicNavigationButton DisplayText="Log ind" Route="/account/login" />
                 </div>
             </EditForm>
 
