@@ -1,38 +1,39 @@
 ﻿@page "/account/login"
-@layout CleanNavbarLayout
 
-<div id="content" class="position-absolute top-50 start-50 translate-middle">
-    <div class="card w-100 bg-primary">
-        <div class="card-body">
-            <DisplayTextHeader HeaderText="Log ind" HeaderType="HeaderType.H2" />
+<div class="row gx-5">
+    <div class="position-absolute top-50 start-50 translate-middle col-12 col-sm-7 col-md-8 col-lg-8 col-xl-5">
+        <div class="card bg-primary">
+            <div class="card-body">
+                <DisplayTextHeader HeaderText="Log ind" HeaderType="HeaderType.H2" />
 
-            @if (!string.IsNullOrEmpty(_message))
-            {
-                <DisplayAlertMessage Message="@_message" AlertType="AlertType.Default" ClearMessageInMilliseconds="3000" />
-            }
+                @if (!string.IsNullOrEmpty(_message))
+                {
+                    <DisplayAlertMessage Message="@_message" AlertType="AlertType.Default" ClearMessageInMilliseconds="3000" />
+                }
 
-            <EditForm EditContext="_editContext" OnValidSubmit="OnValidForm_AuthenticateAccountLogInAsync">
-                <div class="mb-3">
-                    <label for="inputEmail" class="fs-6 text-light">E-mailadresse :</label>
-                    <InputText @bind-Value="_model.EmailAddress" DisplayName="EmailAddress" id="inputEmail" type="email" class="form-control form-control-sm" aria-describedby="emailHelp" placeholder="example@email.dk" />
-                    <ValidationMessage For="() => _model.EmailAddress" />
-                </div>
+                <EditForm EditContext="_editContext" OnValidSubmit="OnValidForm_AuthenticateAccountLogInAsync">
+                    <div class="mb-3">
+                        <label for="inputEmail" class="fs-6 text-light">E-mailadresse :</label>
+                        <InputText @bind-Value="_model.EmailAddress" DisplayName="EmailAddress" id="inputEmail" type="email" class="form-control form-control-sm" aria-describedby="emailHelp" placeholder="example@email.dk" />
+                        <ValidationMessage For="() => _model.EmailAddress" />
+                    </div>
 
-                <div class="mb-3">
-                    <label for="inputPassword text-light">Adgangskode :</label>
-                    <InputText @bind-Value="_model.Password" DisplayName="Password" id="inputPassword" type="password" class="form-control form-control-sm" placeholder="●●●●●●●●●●●●●●" />
-                    <ValidationMessage For="() => _model.Password" />
-                </div>
+                    <div class="mb-3">
+                        <label for="inputPassword text-light">Adgangskode :</label>
+                        <InputText @bind-Value="_model.Password" DisplayName="Password" id="inputPassword" type="password" class="form-control form-control-sm" placeholder="●●●●●●●●●●●●●●" />
+                        <ValidationMessage For="() => _model.Password" />
+                    </div>
 
-                <div class="d-flex justify-content-between py-3">
-                    <button type="submit" class="btn btn-outline-success btn-sm">Log ind</button>
-                    <DynamicNavigationButton DisplayText="Opret bruger" Route="/account/register" />
-                </div>
-            </EditForm>
+                    <div class="d-flex justify-content-between py-3">
+                        <button type="submit" class="btn btn-outline-success btn-sm">Log ind</button>
+                        <DynamicNavigationButton DisplayText="Opret bruger" Route="/account/register" />
+                    </div>
+                </EditForm>
 
-            <p class="text-center g-0 m-0">
-                <a href="#forgot-password" class="text-white text-decoration-none">Glemt adgangskode?</a>
-            </p>
+                <p class="text-center g-0 m-0">
+                    <a href="#forgot-password" class="text-white text-decoration-none">Glemt adgangskode?</a>
+                </p>
+            </div>
         </div>
     </div>
 </div>
