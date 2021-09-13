@@ -28,5 +28,8 @@ namespace XPowerClassLibrary.Users.Repository
 
         bool Logout(string token, string ipAddress);
         Task<bool> LogoutAsync(string token, string ipAddress);
+
+        bool DeleteUserById(int id);
+        Task<bool> DeleteUserByIdAsync(int id);
     }
 }

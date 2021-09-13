@@ -22,7 +22,7 @@ namespace XPowerClassLibrary.Validator
                     new NullRule(),
                     new NoEmptyStringRule(),
                     new MinLengthRule(8),
-                    new MaxLengthRule(500),
+                    new MaxLengthRule(64),
                     new PasswordBlackListRule()
                 };
         static private List<IValidationRule> usernameRules = new List<IValidationRule>()

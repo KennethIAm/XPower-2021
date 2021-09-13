@@ -306,5 +306,42 @@ namespace XPowerClassLibrary.Users
 
             return loggedOutSuccessfully;
         }
+
+        /// <summary>
+        /// Deletes user matching the provided database ID.
+        /// The user entity will be deleted in the database and can not be recovered.
+        /// </summary>
+        /// <param name="id">Id of the user to delete.</param>
+        /// <returns>Bool True if the user is deleted succesfully, false if not.</returns>
+        public bool DeleteUserById(int id)
+        {
+            return this.DeleteUserByIdAsync(id).Result;
+        }
+
+        /// <summary>
+        /// Deletes user matching the provided database ID.
+        /// The user entity will be deleted in the database and can not be recovered.
+        /// Throws ArgumentException if the id does not exist, or is invalid.
+        /// </summary>
+        /// <param name="id">Id of the user to delete.</param>
+        /// <returns>Bool True if the user is deleted succesfully, false if not.</returns>
+        public async Task<bool> DeleteUserByIdAsync(int id)
+        {
+            // Id validation
+            if (id < 1) throw new ArgumentException("Id must be above 0", nameof(id));
+
+            // Get requested user from repository.
+            IUser requestedUserToDelete = await this.userRepository.GetUserByIdAsync(id);
+
+            // Check if the provided id match an exsisting user.
+            if (requestedUserToDelete == null)
+                throw new ArgumentException("The provided id does not match a current user.", nameof(id));
+
+            bool userDeletedSuccessfully = false;
+
+            userDeletedSuccessfully = await this.userRepository.DeleteUserByIdAsync(id);
+
+            return userDeletedSuccessfully;
+        }
     }
 }
