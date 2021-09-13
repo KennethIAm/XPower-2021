@@ -1,0 +1,26 @@
+﻿@switch (HeaderType)
+{
+    case HeaderType.Default:
+        <h2 class="text-uppercase text-center pb-3">@HeaderText</h2>
+        break;
+    case HeaderType.H1:
+        <h1 class="text-uppercase text-center pb-3">@HeaderText</h1>
+        break;
+    case HeaderType.H2:
+        <h2 class="text-uppercase text-center pb-3">@HeaderText</h2>
+        break;
+    case HeaderType.H3:
+        <h3 class="text-uppercase text-center pb-3">@HeaderText</h3>
+        break;
+    case HeaderType.H4:
+        <h4 class="text-uppercase text-center pb-3">@HeaderText</h4>
+        break;
+    case HeaderType.H5:
+        <h5 class="text-uppercase text-center pb-3">@HeaderText</h5>
+        break;
+}
+
+@code {
+    [Parameter] public HeaderType HeaderType { get; set; }
+    [Parameter] public string HeaderText { get; set; }
+}

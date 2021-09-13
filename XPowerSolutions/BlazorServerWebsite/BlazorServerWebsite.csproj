@@ -15,4 +15,8 @@
     <Folder Include="wwwroot\css\libs\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\XPowerClassLibrary\XPowerClassLibrary.csproj" />
+  </ItemGroup>
+
 </Project>
