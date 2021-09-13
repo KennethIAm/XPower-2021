@@ -14,6 +14,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPowerClassLibraryTests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPowerAPI", "XPowerAPI\XPowerAPI.csproj", "{58AD85AF-EBD9-40C7-80E4-15501012ED54}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorServerWebsite", "BlazorServerWebsite\BlazorServerWebsite.csproj", "{A8A46889-4211-485A-BD30-E982AA9F7A10}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{58AD85AF-EBD9-40C7-80E4-15501012ED54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58AD85AF-EBD9-40C7-80E4-15501012ED54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58AD85AF-EBD9-40C7-80E4-15501012ED54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8A46889-4211-485A-BD30-E982AA9F7A10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8A46889-4211-485A-BD30-E982AA9F7A10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8A46889-4211-485A-BD30-E982AA9F7A10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8A46889-4211-485A-BD30-E982AA9F7A10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
