@@ -68,6 +68,7 @@ namespace XPowerClassLibraryTests.Tests
         [TestCase("password")]
         [TestCase("Password")]
         [TestCase("1234")]
+        [TestCase("aeJwxGfPrDQBSYh2wz9ME3HFUvgfCJFMcekehpjFnedhhJuLfGBBNFzjtk7XwjHHA")]
         public void CreateUserAsync_InvalidPasswordInput_ShouldThrowAgumenExeption(string passwordInput)
         {
             // Arrange
@@ -89,10 +90,14 @@ namespace XPowerClassLibraryTests.Tests
             // Act
             createdUser = await this.userServiceDb.CreateUserAsync("testmail" + randomNumber + "@mail.com", "testUsername", "12341234!weqwe");
 
+            // Cleanup
+            bool cleanUpSuccess = await this.userServiceDb.DeleteUserByIdAsync(createdUser.Id);
+
             // Assert
             Assert.IsNotNull(createdUser);
             Assert.IsNotNull(createdUser.Mail);
             Assert.IsNotEmpty(createdUser.Mail);
+            Assert.True(cleanUpSuccess);
         }
 
         [Test]
@@ -117,11 +122,15 @@ namespace XPowerClassLibraryTests.Tests
             // Act
             requestedUser = await this.userServiceDb.GetUserByIdAsync(createdUser.Id);
 
+            // Cleanup
+            bool cleanUpSuccess = await this.userServiceDb.DeleteUserByIdAsync(createdUser.Id);
+
             // Assert
             Assert.IsNotNull(requestedUser);
             Assert.IsNotNull(requestedUser.Id);
             Assert.AreNotEqual(0, requestedUser.Id);
             Assert.AreEqual(email, requestedUser.Mail);
+            Assert.IsTrue(cleanUpSuccess);
         }
 
         [Test]
@@ -151,12 +160,17 @@ namespace XPowerClassLibraryTests.Tests
             // Act
             requestedUser = await this.userServiceDb.GetUserByLoginNameAsync(email);
 
+            // Cleanup
+            bool cleanUpSuccess = await this.userServiceDb.DeleteUserByIdAsync(createdUser.Id);
+
             // Assert
             Assert.IsNotNull(requestedUser);
             Assert.IsNotNull(requestedUser.Id);
             Assert.AreNotEqual(0, requestedUser.Id);
             Assert.AreEqual(email, requestedUser.Mail);
             Assert.AreEqual(createdUser.Id, requestedUser.Id);
+            Assert.IsTrue(cleanUpSuccess);
+
         }
 
         [TestCase("")]
@@ -196,16 +210,21 @@ namespace XPowerClassLibraryTests.Tests
             string email = "testmail" + randomNumber + "@mail.com";
             string password = "testpassword" + randomNumber;
 
-            await this.userServiceDb.CreateUserAsync(email, "testUsername", password);
+            IUser createdUser = await this.userServiceDb.CreateUserAsync(email, "testUsername", password);
 
             // Act
             authenticateResponse = await this.userServiceDb.AuthenticateAsync(email, password, "0.0.0.0");
+
+
+            // Cleanup
+            bool cleanUpSuccess = await this.userServiceDb.DeleteUserByIdAsync(createdUser.Id);
 
             // Assert
             Assert.IsNotNull(authenticateResponse);
             Assert.IsNotNull(authenticateResponse.UserObject);
             Assert.IsNotNull(authenticateResponse.JwtToken);
             Assert.IsNotNull(authenticateResponse.RefreshToken);
+            Assert.IsTrue(cleanUpSuccess);
         }
 
         [Test]
@@ -217,13 +236,17 @@ namespace XPowerClassLibraryTests.Tests
             string email = "testmail" + randomNumber + "@mail.com";
             string password = "testpassword" + randomNumber;
 
-            await this.userServiceDb.CreateUserAsync(email, "testUsername", password);
+            IUser createdUser = await this.userServiceDb.CreateUserAsync(email, "testUsername", password);
 
             // Act
             authenticateResponse = await this.userServiceDb.AuthenticateAsync(email, password+"1", "0.0.0.0");
 
+            // Cleanup
+            bool cleanUpSuccess = await this.userServiceDb.DeleteUserByIdAsync(createdUser.Id);
+
             // Assert
             Assert.IsNull(authenticateResponse);
+            Assert.IsTrue(cleanUpSuccess);
         }
 
         [Test]
@@ -235,11 +258,14 @@ namespace XPowerClassLibraryTests.Tests
             string email = "testmail" + randomNumber + "@mail.com";
             string password = "testpassword" + randomNumber;
 
-            await this .userServiceDb.CreateUserAsync(email, "testUsername", password);
+            IUser createdUser = await this .userServiceDb.CreateUserAsync(email, "testUsername", password);
             authenticateResponse = await this.userServiceDb.AuthenticateAsync(email, password, "0.0.0.0");
 
             // Act
             bool logoutSuccess = await this.userServiceDb.LogoutAsync(authenticateResponse.RefreshToken, "0.0.0.0");
+
+            // Cleanup
+            bool cleanUpSuccess = await this.userServiceDb.DeleteUserByIdAsync(createdUser.Id);
 
             // Assert
             Assert.IsNotNull(authenticateResponse);
@@ -247,6 +273,7 @@ namespace XPowerClassLibraryTests.Tests
             Assert.IsNotNull(authenticateResponse.JwtToken);
             Assert.IsNotNull(authenticateResponse.RefreshToken);
             Assert.IsTrue(logoutSuccess);
+            Assert.IsTrue(cleanUpSuccess);
         }
 
         [TestCase("")]
@@ -264,6 +291,44 @@ namespace XPowerClassLibraryTests.Tests
             // Act & Assert
             Assert.ThrowsAsync<ArgumentNullException>(async () => { await this.userServiceDb.LogoutAsync(token, "0.0.0.0"); });
         }
+
+        [TestCase(0)]
+        [TestCase(-1)]
+        [TestCase(int.MinValue)]
+        public async Task DeleteUser_InvalidInput_ShouldReturnArgumentException(int id)
+        {
+            // Act & Assert
+            Assert.ThrowsAsync<ArgumentException>(async () => { await this.userServiceDb.DeleteUserByIdAsync(id); });
+        }
+
+        [Test]
+        public async Task DeleteUser_NonExistingUser_ShouldThrowArgumentException()
+        {
+            // Arrange 
+            int nonExistingUserId = 9999999;
+
+            // Act & Assert
+            Assert.ThrowsAsync<ArgumentException>(async () => { await this.userServiceDb.DeleteUserByIdAsync(nonExistingUserId); });
+        }
+
+        [Test]
+        public async Task DeleteUser_ExistingUser_ShouldDeleteUserAndReturnTrue()
+        {
+            // Arrange 
+            IUser newlyCreatedTestUser;
+            bool deleteSuccessfull = false;
+            long randomNumber = new Random().Next(10000, 20000);
+
+            newlyCreatedTestUser = await this.userServiceDb.CreateUserAsync("testmail" + randomNumber + "@mail.com", "testUsername", "12341234!weqwe");
+
+            // Act
+            deleteSuccessfull = await this.userServiceDb.DeleteUserByIdAsync(newlyCreatedTestUser.Id);
+
+            // Assert
+            Assert.True(deleteSuccessfull);
+        }
+
+
 
     }
 }

@@ -308,6 +308,37 @@ namespace XPowerClassLibrary.Users.Repository
             return revokeSuccess;
         }
 
+
+        /// <summary>
+        /// Deletes user in the database matching the provided ID.
+        /// </summary>
+        /// <param name="id">Id of the user to delete.</param>
+        /// <returns>Bool true if the user has been deleted successfully, false if not.</returns>
+        public bool DeleteUserById(int id)
+        {
+            return this.DeleteUserByIdAsync(id).Result;
+        }
+
+        /// <summary>
+        /// Deletes user in the database matching the provided ID.
+        /// </summary>
+        /// <param name="id">Id of the user to delete.</param>
+        /// <returns>Bool true if the user has been deleted successfully, false if not.</returns>
+        public async Task<bool> DeleteUserByIdAsync(int id)
+        {
+            bool userDeletedSuccessfully = false;
+            using (var conn = UserServiceFactory.GetSqlConnectionDeleteUser())
+            {
+                await conn.OpenAsync();
+                var procedure = "[SPDeleteUserById]";
+                var values = new { @Id = id };
+                userDeletedSuccessfully = await conn.ExecuteScalarAsync<bool>(procedure, values, commandType: CommandType.StoredProcedure);
+                conn.Close();
+            }
+
+            return userDeletedSuccessfully;
+        }
+
         /// <summary>
         /// Checks if a user with thise unique paramerters already exists in the database.
         /// </summary>

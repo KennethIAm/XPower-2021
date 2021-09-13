@@ -44,6 +44,18 @@ namespace XPowerClassLibrary.Users
             return CommonSettingsFactory.GetDBConnectionString(username, password);
         }
 
+        /// <summary>
+        /// SqlConnection with permission to delete users.
+        /// </summary>
+        /// <returns>SqlConnection with specific permission</returns>
+        internal static SqlConnection GetSqlConnectionDeleteUser()
+        {
+            string username = "UserDelete";
+            string password = "Passw0rd";
+
+            return CommonSettingsFactory.GetDBConnectionString(username, password);
+        }
+
         public static IUserService GetUserServiceDB()
         {
             return new UserService(new DbUserRepository());
