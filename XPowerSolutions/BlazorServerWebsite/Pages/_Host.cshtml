@@ -1,6 +1,7 @@
 ﻿@page "/"
 @namespace BlazorServerWebsite.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using BlazorServerWebsite.Data.Models
 @{
     Layout = null;
 }
@@ -12,12 +13,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BlazorServerWebsite</title>
     <base href="~/" />
-    <link rel="stylesheet" href="css/libs/bootstrap/css/bootstrap.css"/>
+    <link rel="stylesheet" href="css/libs/bootstrap/css/bootstrap.css" />
     <link href="css/site.css" rel="stylesheet" />
     <link href="BlazorServerWebsite.styles.css" rel="stylesheet" />
 </head>
 <body>
-    <component type="typeof(App)" render-mode="ServerPrerendered" />
+    <component type="typeof(App)" render-mode="ServerPrerendered"  />
 
     <div id="blazor-error-ui">
         <environment include="Staging,Production">

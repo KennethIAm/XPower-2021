@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace H4_TrashPlusPlus.Models
+namespace XPowerClassLibrary.Users.Models
 {
     public class AuthenticateRequest
     {
