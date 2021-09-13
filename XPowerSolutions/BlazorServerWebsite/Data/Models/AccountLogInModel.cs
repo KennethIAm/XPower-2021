@@ -1,13 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-
+﻿using System;
+using XPowerClassLibrary.Validator;
 namespace BlazorServerWebsite.Data.Models
 {
-    public class AccountLogInModel
+    public class AccountLogInModel : BaseAccountModel
     {
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Indtast venligst en gyldig e-mailadresse.")]
-        public string EmailAddress { get; set; }
-
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Indtast venglist legitimationsoplysninger.")]
-        public string Password { get; set; }
     }
 }

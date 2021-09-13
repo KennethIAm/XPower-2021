@@ -12,6 +12,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPowerAPI", "XPowerAPI\XPow
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorServerWebsite", "BlazorServerWebsite\BlazorServerWebsite.csproj", "{A8A46889-4211-485A-BD30-E982AA9F7A10}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPowerAPI", "XPowerAPI\XPowerAPI.csproj", "{4A7F1CFD-6352-4F51-BC1C-7A4C7DF2FFB4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

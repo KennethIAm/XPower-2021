@@ -29,9 +29,9 @@ form label {
 
 a {
     position: relative;
+    padding: 0 1rem 0 1rem;
     padding-top: 0.3125rem;
     padding-bottom: 0.3125rem;
-    margin-right: 1rem;
     white-space: nowrap;
 }
 
@@ -93,7 +93,7 @@ a {
 /* Hello */
 
 #content {
-    min-width: 500px;
+    /*min-width: 500px;*/
     /*position: absolute;
     width: auto;
     height: auto;
