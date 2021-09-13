@@ -1,0 +1,48 @@
+﻿::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color: var(--clr-placeholder-rgb) !important;
+}
+
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color: var(--clr-placeholder-rgb) !important;
+    opacity: 1;
+}
+
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color: var(--clr-placeholder-rgb) !important;
+    opacity: 1;
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color: var(--clr-placeholder-rgb) !important;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+    color: var(--clr-placeholder-rgb) !important;
+}
+
+::placeholder { /* Most modern browsers support this now. */
+    color: var(--clr-placeholder-rgb) !important;
+}
+
+.form-control {
+    background-color: var(--clr-bg-light-rgb) !important;
+}
+
+    .form-control:focus {
+        color: var(--clr-primary);
+        background-color: var(--clr-bg-secondary-rgb) !important;
+        border-color: var(--clr-primary) !important;
+        box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%) !important;
+    }
+
+/*.valid.modified:not([type=checkbox]) {
+    outline: .05rem solid var(--clr-success);
+}
+
+.invalid {
+    outline: .05rem solid var(--clr-danger);
+}*/
+
+.validation-message {
+    color: var(--clr-danger);
+}
