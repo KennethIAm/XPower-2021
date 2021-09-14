@@ -22,7 +22,6 @@ namespace BlazorServerWebsite.Pages.Account
         [Inject] protected ApiSettings ApiSettings { get; set; }
         [Inject] protected IJSRuntime JSRuntime { get; set; }
 
-        private HttpRequestMessage _requestMessage;
         private AccountRegisterModel _model;
         private EditContext _editContext;
         private string _message = string.Empty;
