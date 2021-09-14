@@ -18,9 +18,7 @@ namespace BlazorServerWebsite.Data.Providers
     {
         private readonly ILocalStorageService _localStorage;
         private readonly ApiSettings _apiSettings;
-        private readonly string _jwtToken = "JwtToken";
-        private readonly string _refreshToken = "RefreshToken";
-
+        
         public AuthStateProvider(ILocalStorageService localStorage, ApiSettings apiSettings)
         {
             _localStorage = localStorage;
@@ -33,7 +31,7 @@ namespace BlazorServerWebsite.Data.Providers
 
             AuthenticateResponse auth;
 
-            string token = await _localStorage.GetItemAsync<string>(_refreshToken);
+            string token = await _localStorage.GetItemAsync<string>(_apiSettings.RefreshTokenKey);
 
             if (!string.IsNullOrWhiteSpace(token) && !string.IsNullOrEmpty(token))
             {
@@ -51,7 +49,7 @@ namespace BlazorServerWebsite.Data.Providers
 
                     auth = await result.Content.ReadFromJsonAsync<AuthenticateResponse>();
 
-                    await _localStorage.SetItemAsync(_refreshToken, auth.RefreshToken);
+                    await _localStorage.SetItemAsync(_apiSettings.RefreshTokenKey, auth.RefreshToken);
 
                     identity = GetClaimsIdentity(auth);
                 }
@@ -78,8 +76,8 @@ namespace BlazorServerWebsite.Data.Providers
                 throw new NullReferenceException("Couldn't authenticate user.");
             }
 
-            await _localStorage.SetItemAsync(_jwtToken, authenticateResponse.JwtToken);
-            await _localStorage.SetItemAsync(_refreshToken, authenticateResponse.RefreshToken);
+            await _localStorage.SetItemAsync(_apiSettings.JwtKey, authenticateResponse.JwtToken);
+            await _localStorage.SetItemAsync(_apiSettings.RefreshTokenKey, authenticateResponse.RefreshToken);
 
             ClaimsIdentity identity = GetClaimsIdentity(authenticateResponse);
 
@@ -90,8 +88,8 @@ namespace BlazorServerWebsite.Data.Providers
 
         public async Task MarkUserAsLoggedOut()
         {
-            await _localStorage.RemoveItemAsync(_jwtToken);
-            await _localStorage.RemoveItemAsync(_refreshToken);
+            await _localStorage.RemoveItemAsync(_apiSettings.JwtKey);
+            await _localStorage.RemoveItemAsync(_apiSettings.RefreshTokenKey);
 
             ClaimsIdentity identity = new();
 
@@ -105,7 +103,7 @@ namespace BlazorServerWebsite.Data.Providers
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
         }
 
-        public ClaimsIdentity GetClaimsIdentity(AuthenticateResponse authenticateResponse)
+        private static ClaimsIdentity GetClaimsIdentity(AuthenticateResponse authenticateResponse)
         {
             // Initialize new identity.
             ClaimsIdentity identity = new();
