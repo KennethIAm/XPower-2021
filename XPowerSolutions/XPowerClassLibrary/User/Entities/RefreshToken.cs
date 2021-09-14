@@ -1,7 +1,7 @@
 ﻿using Dapper.Contrib.Extensions;
 using System;
 
-namespace H4_TrashPlusPlus.Entities
+namespace XPowerAPI.Entities
 {
     [Table("RefreshToken")]
     public class RefreshToken

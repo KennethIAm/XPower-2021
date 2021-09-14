@@ -1,4 +1,4 @@
-﻿using H4_TrashPlusPlus.Entities;
+﻿using XPowerAPI.Entities;
 using XPowerClassLibrary.Users.Entities;
 using Newtonsoft.Json;
 using System;
