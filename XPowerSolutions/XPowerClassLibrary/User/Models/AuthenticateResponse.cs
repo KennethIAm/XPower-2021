@@ -13,7 +13,7 @@ namespace XPowerClassLibrary.Users.Models
         public User UserObject { get; set; }
         public string JwtToken { get; set; }
 
-        [JsonIgnore] // refresh token is returned in http only cookie
+        //[JsonIgnore] // refresh token is returned in http only cookie
         public string RefreshToken { get; set; }
 
         public AuthenticateResponse() { }
