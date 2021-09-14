@@ -28,5 +28,8 @@ namespace XPowerClassLibrary.Users
 
         IUser GetUserByLoginName(string loginName);
         Task<IUser> GetUserByLoginNameAsync(string loginName);
+
+        bool DeleteUserById(int id);
+        Task<bool> DeleteUserByIdAsync(int id);
     }
 }

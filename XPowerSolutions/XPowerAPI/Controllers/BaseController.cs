@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using H4_TrashPlusPlus.Models;
+using XPowerAPI.Models;
 using Microsoft.AspNetCore.Http;
 using System;
 using XPowerClassLibrary.Users;
-using H4_TrashPlusPlus.Entities;
+using XPowerAPI.Entities;
 using System.Data;
 using XPowerClassLibrary.Users.Models;
 using XPowerClassLibrary.Users.Entities;
@@ -12,7 +12,7 @@ using Microsoft.Net.Http.Headers;
 using XPowerClassLibrary;
 using System.Threading.Tasks;
 
-namespace H4_TrashPlusPlus.Controllers
+namespace XPowerAPI.Controllers
 {
     public class BaseController : ControllerBase
     {
@@ -40,6 +40,31 @@ namespace H4_TrashPlusPlus.Controllers
                 currentUser = null;
             }
             return currentUser;
+        }
+
+        /// <summary>
+        /// Returns the current user, if one is logged in
+        /// </summary>
+        /// <param name="userService">IUserService to use</param>
+        /// <returns>Current logged in user, or null</returns>
+        protected async Task<bool> IsUserLoggedIn(IUserService userService)
+        {
+            bool userIsLoggedin = false;
+            
+            if (User.Identity.IsAuthenticated)
+            {
+                try
+                {
+                    IUser currentUser = null;
+                    currentUser = await userService.GetUserByTokenAsync(this.GetCurrentUserToken());
+
+                    if (currentUser != null)
+                        userIsLoggedin = true;
+                }
+                catch { }
+            }
+
+            return userIsLoggedin;
         }
 
     }

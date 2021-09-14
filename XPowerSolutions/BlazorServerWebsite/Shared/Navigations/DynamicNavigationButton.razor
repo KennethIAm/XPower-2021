@@ -1,0 +1,12 @@
+﻿<button type="button" class="btn btn-outline-light btn-sm" @onclick="NavigateToRoute">@DisplayText</button>
+
+@code {
+    [Parameter] public string DisplayText { get; set; }
+    [Parameter] public string Route { get; set; }
+    [Inject] protected NavigationManager NavigationManager { get; set; }
+
+    private void NavigateToRoute()
+    {
+        NavigationManager.NavigateTo(Route);
+    }
+}

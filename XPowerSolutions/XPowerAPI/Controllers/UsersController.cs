@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using H4_TrashPlusPlus.Models;
+using XPowerAPI.Models;
 using Microsoft.AspNetCore.Http;
 using System;
 using XPowerClassLibrary.Users;
-using H4_TrashPlusPlus.Entities;
+using XPowerAPI.Entities;
 using System.Data;
 using XPowerClassLibrary.Users.Models;
 using XPowerClassLibrary.Users.Entities;
@@ -16,7 +16,7 @@ using System.Security.Cryptography;
 using XPowerClassLibrary.Validator;
 using System.Collections.Generic;
 
-namespace H4_TrashPlusPlus.Controllers
+namespace XPowerAPI.Controllers
 {
     [Authorize]
     [ApiController]
@@ -176,11 +176,21 @@ namespace H4_TrashPlusPlus.Controllers
         [HttpGet("TestLogin")]
         public async Task<IActionResult> TestLogin()
         {
-            if(User.Identity.IsAuthenticated){
-                return Ok(new { message = "User is logged in!" });
-
+            try
+            {
+                if (await this.IsUserLoggedIn(this._userService))
+                {
+                    return Ok(new { message = "User is logged in!" });
+                }
+                else
+                {
+                    return Unauthorized(new { message = "User is not logged in." });
+                }
             }
-            return BadRequest(new { message = "An unexpected error occured. User is not logged in." });
+            catch (Exception e)
+            {
+                return BadRequest(new { message = "An unexpected error occured. User is not logged in." });
+            }
         }
 
         private void SetTokenCookie(string token)

@@ -1,0 +1,49 @@
+﻿@page "/account/register"
+
+<div class="row gx-5">
+    <div class="position-absolute top-50 start-50 translate-middle col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+        <div class="card w-100 bg-primary">
+            <div class="card-body">
+                <DisplayTextHeader HeaderText="Opret bruger" HeaderType="HeaderType.H2" />
+
+                @if (!string.IsNullOrEmpty(_message))
+                {
+                    <DisplayAlertMessage Message="@_message" AlertType="AlertType.Default" ClearMessageInMilliseconds="3000" />
+                }
+
+                <EditForm EditContext="_editContext" OnValidSubmit="OnValidForm_AuthenticateAccountRegisterAsync">
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-7">
+                            <label for="inputEmail" class="fs-6 text-light">E-mailadresse :</label>
+                            <InputText @bind-Value="_model.EmailAddress" DisplayName="EmailAddress" id="inputEmail" type="email" class="form-control form-control-sm" aria-describedby="emailHelp" placeholder="example@email.dk" />
+                            <ValidationMessage For="() => _model.EmailAddress" />
+                        </div>
+                        <div class="col-12 col-sm-5">
+                            <label for="inputUsername" class="fs-6 text-light">Brugernavn :</label>
+                            <InputText @bind-Value="_model.Username" DisplayName="Username" id="inputUsername" type="text" class="form-control form-control-sm" aria-describedby="usernameHelp" placeholder="example123" />
+                            <ValidationMessage For="() => _model.Username" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="inputPassword text-light">Adgangskode :</label>
+                        <InputText @bind-Value="_model.Password" DisplayName="Password" id="inputPassword" type="password" class="form-control form-control-sm" placeholder="●●●●●●●●●●●●●●" />
+                        <ValidationMessage For="() => _model.Password" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="inputReEnterPassword text-light">Gentag adgangskode :</label>
+                        <InputText @bind-Value="_model.ReEnterPassword" DisplayName="ReEnterPassword" id="inputReEnterPassword" type="password" class="form-control form-control-sm" placeholder="●●●●●●●●●●●●●●" />
+                        <ValidationMessage For="() => _model.ReEnterPassword" />
+                    </div>
+
+                    <div class="d-flex justify-content-between py-3">
+                        <button type="submit" class="btn btn-outline-success btn-sm">Opret bruger</button>
+                        <DynamicNavigationButton DisplayText="Log ind" Route="/account/login" />
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
