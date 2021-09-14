@@ -1,10 +1,15 @@
-﻿using BlazorServerWebsite.Data.Models;
+﻿using BlazorServerWebsite.Data;
+using BlazorServerWebsite.Data.Models;
+using BlazorServerWebsite.Data.Providers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -15,48 +20,65 @@ namespace BlazorServerWebsite.Pages.Account
     public partial class AccountLogInPage : ComponentBase
     {
         [Inject] protected IHttpClientFactory ClientFactory { get; set; }
+        [Inject] protected AuthStateProvider AuthStateProvider { get; set; }
+        [Inject] protected NavigationManager NavigationManager { get; set; }
+        [Inject] protected ApiSettings ApiSettings { get; set; }
+        [Inject] protected IJSRuntime JSRuntime { get; set; }
 
         private AccountLogInModel _model;
         private EditContext _editContext;
         private string _message = string.Empty;
-        private string _apiEndpoint = "https://5fc6-93-176-82-57.ngrok.io";
         private HttpRequestMessage _requestMessage;
+        private HttpResponseMessage _responseMessage;
         private HttpClient _client;
 
-        protected override async Task OnInitializedAsync()
+        protected override void OnInitialized()
         {
             InitializeNewContext();
 
             _requestMessage = new HttpRequestMessage(HttpMethod.Post,
-                $"{_apiEndpoint}/user/Authenticate");
-
-            await base.OnInitializedAsync();
+                $"{ApiSettings.BaseEndpoint}{ApiSettings.AuthenticateEndpoint}");
         }
 
         private async Task OnValidForm_AuthenticateAccountLogInAsync()
         {
+            _message = string.Empty;
             _client = ClientFactory.CreateClient();
-            _client.BaseAddress = new Uri(_apiEndpoint);
-            var authRequest = new AuthenticateRequest()
+            _client.BaseAddress = new Uri(ApiSettings.BaseEndpoint);
+
+            using (_client)
             {
-                Username = _model.EmailAddress,
-                Password = _model.Password
-            };
-
-            var jsonRequest = new StringContent(
-                JsonSerializer.Serialize(authRequest), Encoding.UTF8, "application/json");
-
-            var result = await _client.PostAsync(_requestMessage.RequestUri, jsonRequest);
-
-            if (result.IsSuccessStatusCode)
-            {
-                using var responseStream = await result.Content.ReadAsStreamAsync();
-                var user = await JsonSerializer.DeserializeAsync<AuthenticateResponse>(responseStream);
+                _responseMessage = await _client.PostAsJsonAsync(
+                    _requestMessage.RequestUri,
+                    new AuthenticateRequest
+                    {
+                        Username = _model.EmailAddress,
+                        Password = _model.Password
+                    });
             }
 
-            InitializeNewContext();
+            if (_responseMessage.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"We Success Boyyysss.");
 
-            await Task.CompletedTask;
+                var authRes = await _responseMessage.Content.ReadFromJsonAsync<AuthenticateResponse>();
+
+                if (authRes.UserObject is not null)
+                {
+                    Console.WriteLine($"Auth User: {authRes.UserObject.Id}");
+
+                    _message = "Logged in success!";
+                    await AuthStateProvider.MarkUserAsAuthenticated(authRes);
+
+                    InitializeNewContext();
+
+                    NavigationManager.NavigateTo("/");
+                }
+            }
+            else
+            {
+                _message = "E-mailadresse eller legitimationsoplysniger er forkerte.";
+            }
         }
 
         private void InitializeNewContext()

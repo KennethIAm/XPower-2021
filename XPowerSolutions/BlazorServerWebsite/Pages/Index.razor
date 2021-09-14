@@ -1,6 +1,14 @@
 ﻿@page "/"
 @attribute [Authorize]
 
-<h1>Hello, world!</h1>
+<h2 class="text-dark">@("Velkommen, " + _context.User.Identity.Name)</h2>
 
-Welcome to your new app.
+@code {
+    [CascadingParameter] protected Task<AuthenticationState> AuthenticationState { get; set; }
+    private AuthenticationState _context;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _context = await AuthenticationState;
+    }
+} 
