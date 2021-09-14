@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Dapper.Contrib.Extensions;
-using H4_TrashPlusPlus.Entities;
+using XPowerAPI.Entities;
 using XPowerClassLibrary.Users.Models;
 using System;
 using System.Collections.Generic;

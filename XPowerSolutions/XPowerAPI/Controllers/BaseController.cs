@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using H4_TrashPlusPlus.Models;
+using XPowerAPI.Models;
 using Microsoft.AspNetCore.Http;
 using System;
 using XPowerClassLibrary.Users;
-using H4_TrashPlusPlus.Entities;
+using XPowerAPI.Entities;
 using System.Data;
 using XPowerClassLibrary.Users.Models;
 using XPowerClassLibrary.Users.Entities;
@@ -12,7 +12,7 @@ using Microsoft.Net.Http.Headers;
 using XPowerClassLibrary;
 using System.Threading.Tasks;
 
-namespace H4_TrashPlusPlus.Controllers
+namespace XPowerAPI.Controllers
 {
     public class BaseController : ControllerBase
     {

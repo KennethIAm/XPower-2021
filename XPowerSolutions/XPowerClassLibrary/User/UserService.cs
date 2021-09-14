@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using H4_TrashPlusPlus.Entities;
+using XPowerAPI.Entities;
 using XPowerClassLibrary.Users.Entities;
 using XPowerClassLibrary.Users.Models;
 using XPowerClassLibrary.Users.Repository;
