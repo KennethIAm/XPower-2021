@@ -176,11 +176,21 @@ namespace XPowerAPI.Controllers
         [HttpGet("TestLogin")]
         public async Task<IActionResult> TestLogin()
         {
-            if(User.Identity.IsAuthenticated){
-                return Ok(new { message = "User is logged in!" });
-
+            try
+            {
+                if (await this.IsUserLoggedIn(this._userService))
+                {
+                    return Ok(new { message = "User is logged in!" });
+                }
+                else
+                {
+                    return Unauthorized(new { message = "User is not logged in." });
+                }
             }
-            return BadRequest(new { message = "An unexpected error occured. User is not logged in." });
+            catch (Exception e)
+            {
+                return BadRequest(new { message = "An unexpected error occured. User is not logged in." });
+            }
         }
 
         private void SetTokenCookie(string token)
