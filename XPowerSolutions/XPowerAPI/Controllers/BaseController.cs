@@ -42,5 +42,30 @@ namespace XPowerAPI.Controllers
             return currentUser;
         }
 
+        /// <summary>
+        /// Returns the current user, if one is logged in
+        /// </summary>
+        /// <param name="userService">IUserService to use</param>
+        /// <returns>Current logged in user, or null</returns>
+        protected async Task<bool> IsUserLoggedIn(IUserService userService)
+        {
+            bool userIsLoggedin = false;
+            
+            if (User.Identity.IsAuthenticated)
+            {
+                try
+                {
+                    IUser currentUser = null;
+                    currentUser = await userService.GetUserByTokenAsync(this.GetCurrentUserToken());
+
+                    if (currentUser != null)
+                        userIsLoggedin = true;
+                }
+                catch { }
+            }
+
+            return userIsLoggedin;
+        }
+
     }
 }
