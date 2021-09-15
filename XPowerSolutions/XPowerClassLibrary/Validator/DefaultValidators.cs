@@ -13,7 +13,7 @@ namespace XPowerClassLibrary.Validator
                 {
                     new NullRule(),
                     new NoEmptyStringRule(),
-                    new MaxLengthRule(500),
+                    new MaxLengthRule(250),
                     new ValidMailRule(),
                     new NoSqlInjectionRule()
                 };
@@ -31,7 +31,7 @@ namespace XPowerClassLibrary.Validator
                     new NoEmptyStringRule(),
                     new NoSpacesRule(),
                     new MinLengthRule(4),
-                    new MaxLengthRule(500),
+                    new MaxLengthRule(250),
                     new NoSqlInjectionRule()
                 };
 
