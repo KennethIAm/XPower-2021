@@ -12,7 +12,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPowerAPI", "XPowerAPI\XPow
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorServerWebsite", "BlazorServerWebsite\BlazorServerWebsite.csproj", "{A8A46889-4211-485A-BD30-E982AA9F7A10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPowerAPITests", "XPowerAPITests\XPowerAPITests.csproj", "{09A077A2-7AB2-442D-AED8-9EEB71D21E7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPowerAPITests", "XPowerAPITests\XPowerAPITests.csproj", "{09A077A2-7AB2-442D-AED8-9EEB71D21E7F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPowerEndToEndTest", "XPowerEndToEndTest\XPowerEndToEndTest.csproj", "{71556BF9-BA0C-4A8B-B17C-26C0CF0C8296}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,6 +42,10 @@ Global
 		{09A077A2-7AB2-442D-AED8-9EEB71D21E7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09A077A2-7AB2-442D-AED8-9EEB71D21E7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09A077A2-7AB2-442D-AED8-9EEB71D21E7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71556BF9-BA0C-4A8B-B17C-26C0CF0C8296}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71556BF9-BA0C-4A8B-B17C-26C0CF0C8296}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71556BF9-BA0C-4A8B-B17C-26C0CF0C8296}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71556BF9-BA0C-4A8B-B17C-26C0CF0C8296}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
