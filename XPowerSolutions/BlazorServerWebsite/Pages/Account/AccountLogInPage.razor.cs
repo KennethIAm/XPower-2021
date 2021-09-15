@@ -5,13 +5,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Users.Models;
 
@@ -43,6 +38,13 @@ namespace BlazorServerWebsite.Pages.Account
         private async Task OnValidForm_AuthenticateAccountLogInAsync()
         {
             _message = string.Empty;
+
+            if (!_model.IsValidForm())
+            {
+                _message = "En eller flere felter er ikke gyldige.";
+                return;
+            }
+
             _client = ClientFactory.CreateClient();
             _client.BaseAddress = new Uri(ApiSettings.BaseEndpoint);
 
@@ -77,7 +79,7 @@ namespace BlazorServerWebsite.Pages.Account
             }
             else
             {
-                _message = "E-mailadresse eller legitimationsoplysniger er forkerte.";
+                _message = "E-mailadresse eller legitimationsoplysninger er forkerte.";
             }
         }
 
