@@ -1,6 +1,7 @@
 using Blazored.LocalStorage;
 using BlazorServerWebsite.Data;
 using BlazorServerWebsite.Data.Providers;
+using BlazorServerWebsite.Data.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -30,9 +31,11 @@ namespace BlazorServerWebsite
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            var configurationSettings = Configuration.GetSection("ApiSettings").Get<ApiSettings>();
+            var apiSettings = Configuration.GetSection("ApiSettings").Get<ApiSettings>();
+            //var endpointSettings = Configuration.GetSection("Endpoints").Get<EndpointSettings>();
 
-            services.AddSingleton<ApiSettings>(configurationSettings);
+            services.AddSingleton<ISettings>(apiSettings);
+            //services.AddSingleton<EndpointSettings>(endpointSettings);
 
             services.AddRazorPages();
             services.AddServerSideBlazor();

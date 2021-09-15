@@ -1,6 +1,7 @@
 ﻿using BlazorServerWebsite.Data;
 using BlazorServerWebsite.Data.Models;
 using BlazorServerWebsite.Data.Providers;
+using BlazorServerWebsite.Data.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
@@ -17,7 +18,7 @@ namespace BlazorServerWebsite.Pages.Account
         [Inject] protected IHttpClientFactory ClientFactory { get; set; }
         [Inject] protected AuthStateProvider AuthStateProvider { get; set; }
         [Inject] protected NavigationManager NavigationManager { get; set; }
-        [Inject] protected ApiSettings ApiSettings { get; set; }
+        [Inject] protected ISettings Settings { get; set; }
         [Inject] protected IJSRuntime JSRuntime { get; set; }
 
         private AccountLogInModel _model;
@@ -32,7 +33,7 @@ namespace BlazorServerWebsite.Pages.Account
             InitializeNewContext();
 
             _requestMessage = new HttpRequestMessage(HttpMethod.Post,
-                $"{ApiSettings.BaseEndpoint}{ApiSettings.AuthenticateEndpoint}");
+                $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.AuthenticateEndpoint}");
         }
 
         private async Task OnValidForm_AuthenticateAccountLogInAsync()
@@ -46,7 +47,7 @@ namespace BlazorServerWebsite.Pages.Account
             }
 
             _client = ClientFactory.CreateClient();
-            _client.BaseAddress = new Uri(ApiSettings.BaseEndpoint);
+            _client.BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint);
 
             using (_client)
             {
