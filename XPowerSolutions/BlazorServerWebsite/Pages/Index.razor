@@ -1,7 +1,8 @@
 ﻿@page "/"
 @attribute [Authorize]
 
-<h2 class="text-dark">@("Velkommen, " + _context.User.Identity.Name)</h2>
+@*<h2 class="text-dark">@("Velkommen, " + _context.User.Identity.Name)</h2>*@
+<h4 class="text-dark text-center">Velkommen til XPower Solutions!</h4>
 
 @code {
     [CascadingParameter] protected Task<AuthenticationState> AuthenticationState { get; set; }

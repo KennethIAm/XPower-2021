@@ -14,6 +14,11 @@ using XPowerClassLibrary.Users.Models;
 
 namespace BlazorServerWebsite.Data.Providers
 {
+    class ErrorMessage
+    {
+        public string Message { get; set; }
+    }
+
     public class AuthStateProvider : AuthenticationStateProvider
     {
         private readonly ILocalStorageService _localStorage;
@@ -27,46 +32,62 @@ namespace BlazorServerWebsite.Data.Providers
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            ClaimsIdentity identity;
-
-            AuthenticateResponse auth;
-
             string token = await _localStorage.GetItemAsync<string>(_apiSettings.RefreshTokenKey);
 
-            if (!string.IsNullOrWhiteSpace(token) && !string.IsNullOrEmpty(token))
+            if (TokenIsEmptyOrWhiteSpace(token))
             {
-                // Get user from API.
-                var cookieContainer = new CookieContainer();
-                using var handler = new HttpClientHandler { CookieContainer = cookieContainer };
-                using var client = new HttpClient(handler) { BaseAddress = new Uri(_apiSettings.BaseEndpoint) };
-
-                cookieContainer.Add(client.BaseAddress, new Cookie(_apiSettings.RefreshTokenKey, token));
-                var result = await client.PostAsJsonAsync<string>(_apiSettings.RefreshTokenEndpoint, token);
-
-                if (result.IsSuccessStatusCode)
-                {
-                    Console.WriteLine($"Refreshed Token success.");
-
-                    auth = await result.Content.ReadFromJsonAsync<AuthenticateResponse>();
-
-                    await _localStorage.SetItemAsync(_apiSettings.RefreshTokenKey, auth.RefreshToken);
-
-                    identity = GetClaimsIdentity(auth);
-                }
-                else
-                {
-                    await MarkUserAsLoggedOut();
-                    identity = new();
-                }
-            }
-            else
-            {
-                identity = new();
+                return new AuthenticationState(
+                    new ClaimsPrincipal(
+                        new ClaimsIdentity()));
             }
 
-            ClaimsPrincipal principal = new(identity);
+            ClaimsPrincipal principal = new(GetClaimsIdentity(token));
 
             return await Task.FromResult(new AuthenticationState(principal));
+
+            /* OLD */
+            //AuthenticateResponse auth;
+            //ClaimsIdentity identity;
+            //if (!string.IsNullOrWhiteSpace(token) && !string.IsNullOrEmpty(token))
+            //{
+            //    // Get user from API.
+            //    var cookieContainer = new CookieContainer();
+            //    using var handler = new HttpClientHandler { CookieContainer = cookieContainer };
+            //    using var client = new HttpClient(handler) { BaseAddress = new Uri(_apiSettings.BaseEndpoint) };
+
+            //    cookieContainer.Add(client.BaseAddress, new Cookie(_apiSettings.RefreshTokenKey, token));
+            //    var result = await client.PostAsJsonAsync<string>(_apiSettings.RefreshTokenEndpoint, token);
+
+            //    Console.WriteLine($"Server Response Code from Auth: {result.StatusCode}");
+
+            //    if (result.IsSuccessStatusCode)
+            //    {
+            //        Console.WriteLine($"Refreshed Token success.");
+
+            //        auth = await result.Content.ReadFromJsonAsync<AuthenticateResponse>();
+
+            //        await _localStorage.SetItemAsync(_apiSettings.RefreshTokenKey, auth.RefreshToken);
+
+            //        identity = GetClaimsIdentity(auth);
+            //    }
+            //    else
+            //    {
+            //        var message = await result.Content.ReadFromJsonAsync<ErrorMessage>();
+
+            //        Console.WriteLine($"Server Message: {message.Message}");
+
+            //        await MarkUserAsLoggedOut();
+            //        identity = new();
+            //    }
+            //}
+            //else
+            //{
+            //    identity = new();
+            //}
+
+            //ClaimsPrincipal principal = new(identity);
+
+            //return await Task.FromResult(new AuthenticationState(principal));
         }
 
         public async Task MarkUserAsAuthenticated(AuthenticateResponse authenticateResponse)
@@ -103,6 +124,11 @@ namespace BlazorServerWebsite.Data.Providers
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
         }
 
+        private static bool TokenIsEmptyOrWhiteSpace(string token)
+        {
+            return string.IsNullOrEmpty(token) || string.IsNullOrWhiteSpace(token);
+        }
+
         private static ClaimsIdentity GetClaimsIdentity(AuthenticateResponse authenticateResponse)
         {
             // Initialize new identity.
@@ -128,6 +154,20 @@ namespace BlazorServerWebsite.Data.Providers
                 }
 
             }
+            return identity;
+        }
+
+        private static ClaimsIdentity GetClaimsIdentity(string token)
+        {
+            List<Claim> claims = new()
+            {
+                new Claim(ClaimTypes.Authentication, token)
+            };
+
+            ClaimsIdentity identity = new(
+                claims: claims,
+                authenticationType: "Bearer Token");
+
             return identity;
         }
     }

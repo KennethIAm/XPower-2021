@@ -13,7 +13,7 @@
 
                 <EditForm EditContext="_editContext" OnValidSubmit="OnValidForm_AuthenticateAccountLogInAsync">
                     <div class="mb-3">
-                        <label for="inputEmail" class="fs-6 text-light">E-mailadresse :</label>
+                        <label for="inputEmail" class="fs-6 text-light">Mail :</label>
                         <InputText @bind-Value="_model.EmailAddress" DisplayName="EmailAddress" id="inputEmail" type="email" class="form-control form-control-sm" aria-describedby="emailHelp" placeholder="example@email.dk" />
                         <ValidationMessage For="() => _model.EmailAddress" />
                     </div>
@@ -25,14 +25,14 @@
                     </div>
 
                     <div class="d-flex justify-content-between py-3">
-                        <button type="submit" class="btn btn-outline-success btn-sm">Log ind</button>
                         <DynamicNavigationButton DisplayText="Opret bruger" Route="/account/register" />
+                        <button type="submit" class="btn btn-outline-success btn-sm">Log ind</button>
                     </div>
                 </EditForm>
 
-                <p class="text-center g-0 m-0">
+                @*<p class="text-center g-0 m-0">
                     <a href="#forgot-password" class="text-white text-decoration-none">Glemt adgangskode?</a>
-                </p>
+                </p>*@
             </div>
         </div>
     </div>
