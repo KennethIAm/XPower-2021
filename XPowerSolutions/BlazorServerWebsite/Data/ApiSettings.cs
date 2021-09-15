@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace BlazorServerWebsite.Data
+﻿namespace BlazorServerWebsite.Data
 {
     public class ApiSettings
     {

@@ -34,6 +34,13 @@ namespace BlazorServerWebsite.Pages.Account
         private async Task OnValidForm_AuthenticateAccountRegisterAsync()
         {
             _message = "";
+
+            if (!_model.IsValidForm())
+            {
+                _message = "En eller flere felter er ikke gyldige.";
+                return;
+            }
+
             var client = GetHttpClient(ApiSettings.BaseEndpoint);
 
             using (client)

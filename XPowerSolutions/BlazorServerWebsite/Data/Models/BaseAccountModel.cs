@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,8 +16,8 @@ namespace BlazorServerWebsite.Data.Models
         [Required(AllowEmptyStrings = false, ErrorMessage = "Indtast venglist legitimationsoplysninger.")]
         [MinLength(8, ErrorMessage = "Legitimationsoplysninger opfylder ikke vores sikkerhedskrav. Skal være minimum 8 karakterer langt.")]
         [MaxLength(64, ErrorMessage = "Legitimationsoplysninger opfylder ikke vores sikkerhedskrav. Må maksimalt være 64 karakterer langt.")]
+        [PasswordPropertyText]
         public string Password { get; set; }
-
 
         public virtual bool IsEmailValid()
         {
@@ -43,6 +44,11 @@ namespace BlazorServerWebsite.Data.Models
             {
                 return false;
             }
+        }
+
+        public virtual bool IsValidForm()
+        {
+            return IsEmailValid() && IsPasswordValid();
         }
     }
 }
