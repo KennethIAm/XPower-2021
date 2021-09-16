@@ -35,7 +35,7 @@ namespace XPowerEndToEndTest.Test
 
 
         [Test]
-        public void OpenChrome_OpensTheWebBrowser_ShouldOpenWeb()
+        public void LogOutSuccessTest()
         {
             edgeDriver.Url = testUrl;
 
@@ -53,7 +53,6 @@ namespace XPowerEndToEndTest.Test
             edgeDriver.Close();
             Assert.Pass();
         }
-
 
 
         [TearDown]
