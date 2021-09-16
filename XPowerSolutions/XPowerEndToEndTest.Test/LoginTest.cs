@@ -21,6 +21,8 @@ namespace XPowerEndToEndTest.Test
         IWebElement loginbtn;
         IWebElement burgerMenu;
         IWebElement logOutbtn;
+        IWebElement errorBox;
+
 
         DefaultWait<IWebDriver> wait;
 
@@ -52,7 +54,6 @@ namespace XPowerEndToEndTest.Test
                 emailInput.SendKeys(test1);
                 passwordInput.SendKeys(test2);
                 loginbtn.Click();
-
 
                 try
                 {
@@ -88,11 +89,18 @@ namespace XPowerEndToEndTest.Test
 
 
 
-      [TestCase("Faillmaill@email.com", "faillpassword")]
-        public void LoginFaillTest(string test1, string test2)
+      [TestCase("Faillmaill1@email.com", "faillpassword")]
+      [TestCase("Faillmaill2@email.com", "faillpassword")]
+      [TestCase("Faillmaill3@email.com", "faillpassword")]
+      [TestCase("Faillmaill4@email.com", "faillpassword")]
+      [TestCase("Faillmaill5@email.com", "faillpassword")]
+        public void Login_IncorrectCredentials_ShouldFaillLoginAndGetAnErrorMessage(string test1, string test2)
         {
             try
             {
+                edgeDriver = new EdgeDriver(@"C:\Users\johan\Desktop\Programming\skole\XPower-2021\XPowerSolutions\XPowerEndToEndTest.Test\bin\Debug");
+                wait = new WebDriverWait(edgeDriver, TimeSpan.FromSeconds(10));
+
                 edgeDriver.Url = testUrl;
 
                 emailInput = wait.Until(ExpectedConditions.ElementExists(By.Id("inputEmail")));
@@ -103,17 +111,27 @@ namespace XPowerEndToEndTest.Test
                 passwordInput.SendKeys(test2);
                 loginbtn.Click();
 
-                edgeDriver.Close();
-                Assert.Pass();
+                try
+                {
+                    errorBox = wait.Until(ExpectedConditions.ElementExists(By.XPath("/html/body/div[1]/div/div/div/div/div")));
+                    Assert.Pass();
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Assert.Fail(ex.Message);
-
+                throw;
+            }
+            finally
+            {
+                edgeDriver.Close();
             }
         }
 
-
+        
 
         [TearDown]
         public void TearDown()
