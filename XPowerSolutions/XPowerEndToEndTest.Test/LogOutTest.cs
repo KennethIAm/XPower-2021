@@ -10,7 +10,7 @@ namespace XPowerEndToEndTest.Test
 {
     public class LogOutTest
     {
-        string testUrl = "http://7351-93-176-82-58.ngrok.io/account/login";
+        string testUrl = "https://localhost:6001/account/login";
 
         IWebDriver edgeDriver;
 
@@ -27,7 +27,7 @@ namespace XPowerEndToEndTest.Test
         [OneTimeSetUp]
         public void Setup()
         {
-            edgeDriver = new EdgeDriver(@"C:\Users\johan\Desktop\Programming\skole\XPower-2021\XPowerSolutions\XPowerEndToEndTest.Test\bin\Debug");
+            edgeDriver = new EdgeDriver(@"D:\_Projects\XPower-2021\XPowerSolutions\XPowerEndToEndTest.Test");
 
             wait = new WebDriverWait(edgeDriver, TimeSpan.FromSeconds(10));
         }
