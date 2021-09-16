@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,16 +16,9 @@ namespace BlazorServerWebsite.Data.Models
         public string Username { get; set; }
 
         [Required(AllowEmptyStrings =false, ErrorMessage = "Venligst genindtast legitimationsoplysninger.")]
+        [Compare(nameof(Password), ErrorMessage = "De indtastede legitimationsoplysninger stemmer ikke overens.")]
+        [PasswordPropertyText]
         public string ReEnterPassword { get; set; }
-
-        public bool IsPasswordMatching()
-        {
-            if (PasswordsAreEqual())
-            {
-                return true;
-            }
-            return false;
-        }
 
         public bool IsUsernameValid()
         {
@@ -39,10 +33,9 @@ namespace BlazorServerWebsite.Data.Models
             }
         }
 
-        private bool PasswordsAreEqual()
+        public override bool IsValidForm()
         {
-            return Password.Equals(ReEnterPassword, StringComparison.Ordinal);
+            return IsUsernameValid() && IsEmailValid() && IsPasswordValid();
         }
-
     }
 }

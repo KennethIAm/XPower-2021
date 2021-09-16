@@ -1,17 +1,13 @@
 ﻿using BlazorServerWebsite.Data;
 using BlazorServerWebsite.Data.Models;
 using BlazorServerWebsite.Data.Providers;
+using BlazorServerWebsite.Data.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Users.Models;
 
@@ -22,7 +18,7 @@ namespace BlazorServerWebsite.Pages.Account
         [Inject] protected IHttpClientFactory ClientFactory { get; set; }
         [Inject] protected AuthStateProvider AuthStateProvider { get; set; }
         [Inject] protected NavigationManager NavigationManager { get; set; }
-        [Inject] protected ApiSettings ApiSettings { get; set; }
+        [Inject] protected ISettings Settings { get; set; }
         [Inject] protected IJSRuntime JSRuntime { get; set; }
 
         private AccountLogInModel _model;
@@ -37,14 +33,21 @@ namespace BlazorServerWebsite.Pages.Account
             InitializeNewContext();
 
             _requestMessage = new HttpRequestMessage(HttpMethod.Post,
-                $"{ApiSettings.BaseEndpoint}{ApiSettings.AuthenticateEndpoint}");
+                $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.AuthenticateEndpoint}");
         }
 
         private async Task OnValidForm_AuthenticateAccountLogInAsync()
         {
             _message = string.Empty;
+
+            if (!_model.IsValidForm())
+            {
+                _message = "En eller flere felter er ikke gyldige.";
+                return;
+            }
+
             _client = ClientFactory.CreateClient();
-            _client.BaseAddress = new Uri(ApiSettings.BaseEndpoint);
+            _client.BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint);
 
             using (_client)
             {
@@ -77,7 +80,7 @@ namespace BlazorServerWebsite.Pages.Account
             }
             else
             {
-                _message = "E-mailadresse eller legitimationsoplysniger er forkerte.";
+                _message = "E-mailadresse eller legitimationsoplysninger er forkerte.";
             }
         }
 

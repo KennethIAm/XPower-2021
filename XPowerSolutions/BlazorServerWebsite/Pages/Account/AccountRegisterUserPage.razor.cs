@@ -1,12 +1,10 @@
-﻿using BlazorServerWebsite.Data;
-using BlazorServerWebsite.Data.Models;
+﻿using BlazorServerWebsite.Data.Models;
 using BlazorServerWebsite.Data.Providers;
+using BlazorServerWebsite.Data.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -19,7 +17,7 @@ namespace BlazorServerWebsite.Pages.Account
         [Inject] protected IHttpClientFactory ClientFactory { get; set; }
         [Inject] protected AuthStateProvider AuthStateProvider { get; set; }
         [Inject] protected NavigationManager NavigationManager { get; set; }
-        [Inject] protected ApiSettings ApiSettings { get; set; }
+        [Inject] protected ISettings Settings { get; set; }
         [Inject] protected IJSRuntime JSRuntime { get; set; }
 
         private AccountRegisterModel _model;
@@ -34,12 +32,21 @@ namespace BlazorServerWebsite.Pages.Account
         private async Task OnValidForm_AuthenticateAccountRegisterAsync()
         {
             _message = "";
-            var client = GetHttpClient(ApiSettings.BaseEndpoint);
+
+            if (!_model.IsValidForm())
+            {
+                _message = "En eller flere felter er ikke gyldige.";
+                return;
+            }
+
+            var client = GetHttpClient(Settings.Endpoints.BaseEndpoint);
 
             using (client)
             {
                 // Create User POST.
-                var createUserRequestMessage = GetHttpRequest(HttpMethod.Post, $"{ApiSettings.BaseEndpoint}{ApiSettings.CreateUserEndpoint}");
+                var createUserRequestMessage = GetHttpRequest(
+                    HttpMethod.Post, 
+                    $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.CreateUserEndpoint}");
                 var createUserResponseMessage = await client.PostAsJsonAsync(
                 createUserRequestMessage.RequestUri,
                     new CreateUserRequest
@@ -60,7 +67,9 @@ namespace BlazorServerWebsite.Pages.Account
                     _message = "Bruger blev oprettet.";
 
                     // Login
-                    var logInRequestMessage = GetHttpRequest(HttpMethod.Post, $"{ApiSettings.BaseEndpoint}{ApiSettings.AuthenticateEndpoint}");
+                    var logInRequestMessage = GetHttpRequest(
+                        HttpMethod.Post, 
+                        $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.AuthenticateEndpoint}");
                     var logInResponseMessage = await client.PostAsJsonAsync(
                         logInRequestMessage.RequestUri,
                         new AuthenticateRequest

@@ -18,7 +18,7 @@ namespace XPowerAPITests
     public class UserAPITests
     {
         // API
-        private string apiURL = "https://localhost:44391/";
+        private string apiURL = "https://f051-93-176-82-58.ngrok.io/";
 
         // Endpoints
         private string createUserEndpoint = "user/CreateUser";
