@@ -1,13 +1,10 @@
-﻿using BlazorServerWebsite.Data;
-using BlazorServerWebsite.Data.Models;
+﻿using BlazorServerWebsite.Data.Models;
 using BlazorServerWebsite.Data.Providers;
-using BlazorServerWebsite.Data.Settings;
+using BlazorServerWebsite.Data.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.JSInterop;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Users.Models;
 
@@ -15,25 +12,18 @@ namespace BlazorServerWebsite.Pages.Account
 {
     public partial class AccountLogInPage : ComponentBase
     {
-        [Inject] protected IHttpClientFactory ClientFactory { get; set; }
         [Inject] protected AuthStateProvider AuthStateProvider { get; set; }
         [Inject] protected NavigationManager NavigationManager { get; set; }
-        [Inject] protected ISettings Settings { get; set; }
-        [Inject] protected IJSRuntime JSRuntime { get; set; }
+        [Inject] protected IHttpClientService HttpClientService { get; set; }
+        [Inject] protected ILogger<AccountLogInPage> Logger { get; set; }
 
         private AccountLogInModel _model;
         private EditContext _editContext;
         private string _message = string.Empty;
-        private HttpRequestMessage _requestMessage;
-        private HttpResponseMessage _responseMessage;
-        private HttpClient _client;
 
         protected override void OnInitialized()
         {
             InitializeNewContext();
-
-            _requestMessage = new HttpRequestMessage(HttpMethod.Post,
-                $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.AuthenticateEndpoint}");
         }
 
         private async Task OnValidForm_AuthenticateAccountLogInAsync()
@@ -46,37 +36,24 @@ namespace BlazorServerWebsite.Pages.Account
                 return;
             }
 
-            _client = ClientFactory.CreateClient();
-            _client.BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint);
-
-            using (_client)
+            var authRequest = new AuthenticateRequest
             {
-                _responseMessage = await _client.PostAsJsonAsync(
-                    _requestMessage.RequestUri,
-                    new AuthenticateRequest
-                    {
-                        Username = _model.EmailAddress,
-                        Password = _model.Password
-                    });
-            }
+                Username = _model.EmailAddress,
+                Password = _model.Password
+            };
+            var authenticationResponse = await HttpClientService.AuthenticateAsync(authRequest);
 
-            if (_responseMessage.IsSuccessStatusCode)
+            if (authenticationResponse is not null)
             {
-                Console.WriteLine($"We Success Boyyysss.");
+                Logger.LogInformation($"We Success Boyyysss.");
+                Logger.LogInformation($"Auth User: {authenticationResponse.UserObject.Id}");
 
-                var authRes = await _responseMessage.Content.ReadFromJsonAsync<AuthenticateResponse>();
+                _message = "Logged in success!";
+                await AuthStateProvider.MarkUserAsAuthenticated(authenticationResponse);
 
-                if (authRes.UserObject is not null)
-                {
-                    Console.WriteLine($"Auth User: {authRes.UserObject.Id}");
+                InitializeNewContext();
 
-                    _message = "Logged in success!";
-                    await AuthStateProvider.MarkUserAsAuthenticated(authRes);
-
-                    InitializeNewContext();
-
-                    NavigationManager.NavigateTo("/");
-                }
+                NavigationManager.NavigateTo("/");
             }
             else
             {

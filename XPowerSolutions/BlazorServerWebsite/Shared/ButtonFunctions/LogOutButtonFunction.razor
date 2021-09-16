@@ -1,7 +1,6 @@
 ﻿<button type="button" class="btn btn-outline-light btn-sm" @onclick="LogOutAsync">Log ud</button>
 
 @code {
-
     [Inject]protected AuthStateProvider AuthStateProvider { get; set; }
 
     private async Task LogOutAsync()
