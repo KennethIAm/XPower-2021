@@ -10,7 +10,7 @@ namespace XPowerEndToEndTest.Test
 {
     public class LoginTest
     {
-        string testUrl = "https://c875-93-176-82-58.ngrok.io/";
+        string testUrl = "http://2380-93-176-82-58.ngrok.io/";
 
         IWebDriver edgeDriver;
 
@@ -19,6 +19,7 @@ namespace XPowerEndToEndTest.Test
         IWebElement passwordInput;
 
         IWebElement loginbtn;
+        IWebElement burgerMenu;
         IWebElement logOutbtn;
 
         DefaultWait<IWebDriver> wait;
@@ -26,15 +27,12 @@ namespace XPowerEndToEndTest.Test
         [OneTimeSetUp]
         public void Setup()
         {
-            
-
-            
         }
 
 
 
         [TestCase("MailTest1@email.com", "PasswordTest")]
-        [TestCase("MailTest2@email.com", "PasswordTest")]
+        [TestCase("MailTest6@email.com", "PasswordTest")]
         [TestCase("MailTest3@email.com", "PasswordTest")]
         [TestCase("MailTest4@email.com", "PasswordTest")]
         [TestCase("MailTest5@email.com", "PasswordTest")]
@@ -55,24 +53,42 @@ namespace XPowerEndToEndTest.Test
                 passwordInput.SendKeys(test2);
                 loginbtn.Click();
 
-                logOutbtn = wait.Until(ExpectedConditions.ElementExists(By.XPath("/html/body/nav/div/div/span/button")));
-                if (logOutbtn == null)
-                {
-                    Assert.Fail();
-                }
 
-                edgeDriver.Close();
-                Assert.Pass();
+                try
+                {
+                    burgerMenu = wait.Until(ExpectedConditions.ElementExists(By.XPath("/html/body/nav/div/button")));
+                    burgerMenu.Click();
+                    logOutbtn = wait.Until(ExpectedConditions.ElementExists(By.XPath("/html/body/nav/div/div/span/button")));
+                    burgerMenu.Click();
+
+                    Assert.Pass();
+                }
+                catch (Exception)
+                {
+                    try
+                    {
+                        logOutbtn = wait.Until(ExpectedConditions.ElementExists(By.XPath("/html/body/nav/div/div/span/button")));
+                        Assert.Pass();
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Assert.Fail(ex.Message);
+                throw;
+            }
+            finally
+            {
+                edgeDriver.Close();
             }
         }
 
 
 
-        [TestCase("Faillmaill@email.com", "faillpassword")]
+      [TestCase("Faillmaill@email.com", "faillpassword")]
         public void LoginFaillTest(string test1, string test2)
         {
             try
