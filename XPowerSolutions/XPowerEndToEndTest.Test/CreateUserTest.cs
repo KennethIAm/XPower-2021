@@ -22,6 +22,7 @@ namespace XPowerEndToEndTest.Test
         IWebElement reEnterPassword;
         IWebElement Createbtn;
         IWebElement burgerMenu;
+        IWebElement errorBoxwrongPass;
 
         DefaultWait<IWebDriver> wait;
 
@@ -62,7 +63,6 @@ namespace XPowerEndToEndTest.Test
                 passwordInput.SendKeys(pass);
                 reEnterPassword.SendKeys(pass);
                 Createbtn.Click();
-                //*[@id="inputUsername"]
                 try
                 {
                     burgerMenu = wait.Until(ExpectedConditions.ElementExists(By.XPath("/html/body/nav/div/button")));
@@ -84,9 +84,55 @@ namespace XPowerEndToEndTest.Test
                         throw;
                     }
                 }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
-                edgeDriver.Close();
-                Assert.Pass();
+
+
+        [TestCase("Test", "PasswordTest", "Testuser1")]
+        [TestCase("Test", "PasswordTest", "Testuser2")]
+        [TestCase("Test", "PasswordTest", "Testuser3")]
+        [TestCase("Test", "PasswordTest", "Testuser4")]
+        [TestCase("Test", "PasswordTest", "Testuser5")]
+        public void CreateUser_IncorectPasswordMatch_ShouldDisplayError(string mail, string pass, string usernameinput)
+        {
+            try
+            {
+                edgeDriver = new EdgeDriver(@"C:\Users\johan\Desktop\Programming\skole\XPower-2021\XPowerSolutions\XPowerEndToEndTest.Test\bin\Debug");
+                wait = new WebDriverWait(edgeDriver, TimeSpan.FromSeconds(10));
+
+                edgeDriver.Url = testUrl;
+
+                createNavbtn = wait.Until(ExpectedConditions.ElementExists(By.XPath("/html/body/div[1]/div/div/div/div/form/div[3]/button[1]")));
+                createNavbtn.Click();
+
+                var rnd = new Random(DateTime.Now.ToString().GetHashCode()).Next(100, 10000).ToString();
+                mail = mail + rnd + "@Test.dk";
+
+                username = wait.Until(ExpectedConditions.ElementExists(By.Id("inputUsername")));
+                emailInput = edgeDriver.FindElement(By.Id("inputEmail"));
+                passwordInput = edgeDriver.FindElement(By.Id("inputPassword"));
+                reEnterPassword = edgeDriver.FindElement(By.Id("inputReEnterPassword"));
+                Createbtn = edgeDriver.FindElement(By.XPath("/html/body/div[1]/div/div/div/div/form/div[4]/button[2]"));
+
+                emailInput.SendKeys(mail);
+                username.SendKeys(usernameinput);
+                passwordInput.SendKeys(pass);
+                reEnterPassword.SendKeys(pass + "faill");
+                Createbtn.Click();
+                try
+                {
+                    errorBoxwrongPass = wait.Until(ExpectedConditions.ElementExists(By.XPath("/html/body/div[1]/div/div/div/div/form/div[3]/div")));
+                    Assert.Pass();
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
             catch (Exception)
             {
