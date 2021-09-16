@@ -11,7 +11,7 @@ namespace XPowerEndToEndTest.Test
 {
     public class LoginTest
     {
-        string testUrl = "https://localhost:6001/";
+        string testUrl = "https://17c8-93-176-82-58.ngrok.io/";
 
         IWebDriver edgeDriver;
 
@@ -41,6 +41,7 @@ namespace XPowerEndToEndTest.Test
         [TestCase("MailTest5@email.com", "PasswordTest")]
         public void Login_ValidCredentials_ShouldLoginAndRedirectToHomepage(string mail, string pass)
         {
+
             try
             {
                 edgeDriver = new EdgeDriver(@"D:\_Projects\XPower-2021\XPowerSolutions\XPowerEndToEndTest.Test");
@@ -54,10 +55,13 @@ namespace XPowerEndToEndTest.Test
 
                 emailInput.SendKeys(mail);
                 passwordInput.SendKeys(pass);
-                loginbtn.Click();
+
 
                 Stopwatch benchmarkWatch = new Stopwatch();
                 benchmarkWatch.Start();
+                
+
+                loginbtn.Click();
 
                 try
                 {
@@ -68,6 +72,7 @@ namespace XPowerEndToEndTest.Test
 
                     benchmarkWatch.Stop();
                     Console.WriteLine(benchmarkWatch.ElapsedMilliseconds);
+
                     Assert.Pass();
                 }
                 catch (Exception)
@@ -91,6 +96,9 @@ namespace XPowerEndToEndTest.Test
             {
                 edgeDriver.Close();
             }
+
+
+
         }
 
 

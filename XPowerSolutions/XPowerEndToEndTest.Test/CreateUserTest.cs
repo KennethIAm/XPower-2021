@@ -4,6 +4,7 @@ using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using XPowerClassLibrary.Users;
 
@@ -11,7 +12,7 @@ namespace XPowerEndToEndTest.Test
 {
     public class CreateUserTest
     {
-        string testUrl = "http://2380-93-176-82-58.ngrok.io/";
+        string testUrl = "https://17c8-93-176-82-58.ngrok.io/";
 
         IWebDriver edgeDriver;
         IWebElement emailInput;
@@ -40,7 +41,7 @@ namespace XPowerEndToEndTest.Test
         {
             try
             {
-                edgeDriver = new EdgeDriver(@"C:\Users\johan\Desktop\Programming\skole\XPower-2021\XPowerSolutions\XPowerEndToEndTest.Test\bin\Debug");
+                edgeDriver = new EdgeDriver(@"D:\_Projects\XPower-2021\XPowerSolutions\XPowerEndToEndTest.Test");
                 wait = new WebDriverWait(edgeDriver, TimeSpan.FromSeconds(10));
 
                 edgeDriver.Url = testUrl;
@@ -61,6 +62,12 @@ namespace XPowerEndToEndTest.Test
                 username.SendKeys(usernameinput);
                 passwordInput.SendKeys(pass);
                 reEnterPassword.SendKeys(pass);
+
+
+                Stopwatch benchmarkWatch = new Stopwatch();
+                benchmarkWatch.Start();
+                
+
                 Createbtn.Click();
                 //*[@id="inputUsername"]
                 try
@@ -70,6 +77,8 @@ namespace XPowerEndToEndTest.Test
                     logOutbtn = wait.Until(ExpectedConditions.ElementExists(By.XPath("/html/body/nav/div/div/span/button")));
                     burgerMenu.Click();
 
+                    benchmarkWatch.Stop();
+                    Console.WriteLine(benchmarkWatch.ElapsedMilliseconds);
                     Assert.Pass();
                 }
                 catch (Exception)

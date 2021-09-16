@@ -4,13 +4,14 @@ using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 
 namespace XPowerEndToEndTest.Test
 {
     public class LogOutTest
     {
-        string testUrl = "https://localhost:6001/account/login";
+        string testUrl = "https://17c8-93-176-82-58.ngrok.io/account/login";
 
         IWebDriver edgeDriver;
 
@@ -47,10 +48,16 @@ namespace XPowerEndToEndTest.Test
             passwordInput.SendKeys("PasswordTest");
             loginbtn.Click();
 
+            Stopwatch benchmarkWatch = new Stopwatch();
+            benchmarkWatch.Start();
+            
+
             logOutbtn = wait.Until(ExpectedConditions.ElementExists(By.XPath("/html/body/nav/div/div/span/button")));
             logOutbtn.Click();
 
             edgeDriver.Close();
+            benchmarkWatch.Stop();
+            Console.WriteLine(benchmarkWatch.ElapsedMilliseconds);
             Assert.Pass();
         }
 

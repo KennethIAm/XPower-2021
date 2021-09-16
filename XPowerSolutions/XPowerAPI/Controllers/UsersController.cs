@@ -173,6 +173,7 @@ namespace XPowerAPI.Controllers
 
         }
 
+        [AllowAnonymous]
         [HttpGet("TestLogin")]
         public async Task<IActionResult> TestLogin()
         {
