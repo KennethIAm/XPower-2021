@@ -38,7 +38,7 @@ namespace XPowerEndToEndTest.Test
         [TestCase("MailTest3@email.com", "PasswordTest")]
         [TestCase("MailTest4@email.com", "PasswordTest")]
         [TestCase("MailTest5@email.com", "PasswordTest")]
-        public void Login_ValidCredentials_ShouldLoginAndRedirectToHomepage(string test1, string test2)
+        public void Login_ValidCredentials_ShouldLoginAndRedirectToHomepage(string mail, string pass)
         {
             try
             {
@@ -51,8 +51,8 @@ namespace XPowerEndToEndTest.Test
                 passwordInput = edgeDriver.FindElement(By.Id("inputPassword"));
                 loginbtn = edgeDriver.FindElement(By.XPath("/html/body/div[1]/div/div/div/div/form/div[3]/button[2]"));
 
-                emailInput.SendKeys(test1);
-                passwordInput.SendKeys(test2);
+                emailInput.SendKeys(mail);
+                passwordInput.SendKeys(pass);
                 loginbtn.Click();
 
                 try
