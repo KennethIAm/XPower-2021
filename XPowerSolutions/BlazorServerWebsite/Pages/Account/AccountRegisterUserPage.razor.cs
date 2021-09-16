@@ -1,12 +1,9 @@
 ﻿using BlazorServerWebsite.Data.Models;
 using BlazorServerWebsite.Data.Providers;
-using BlazorServerWebsite.Data.Settings;
+using BlazorServerWebsite.Data.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.JSInterop;
-using System;
-using System.Net.Http;
-using System.Net.Http.Json;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Users.Models;
 
@@ -14,11 +11,10 @@ namespace BlazorServerWebsite.Pages.Account
 {
     public partial class AccountRegisterUserPage : ComponentBase
     {
-        [Inject] protected IHttpClientFactory ClientFactory { get; set; }
         [Inject] protected AuthStateProvider AuthStateProvider { get; set; }
         [Inject] protected NavigationManager NavigationManager { get; set; }
-        [Inject] protected ISettings Settings { get; set; }
-        [Inject] protected IJSRuntime JSRuntime { get; set; }
+        [Inject] protected IHttpClientService HttpClientService { get; set; }
+        [Inject] protected ILogger<AccountRegisterUserPage> Logger { get; set; }
 
         private AccountRegisterModel _model;
         private EditContext _editContext;
@@ -39,84 +35,46 @@ namespace BlazorServerWebsite.Pages.Account
                 return;
             }
 
-            var client = GetHttpClient(Settings.Endpoints.BaseEndpoint);
-
-            using (client)
+            var createUserRequest = new CreateUserRequest
             {
-                // Create User POST.
-                var createUserRequestMessage = GetHttpRequest(
-                    HttpMethod.Post, 
-                    $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.CreateUserEndpoint}");
-                var createUserResponseMessage = await client.PostAsJsonAsync(
-                createUserRequestMessage.RequestUri,
-                    new CreateUserRequest
-                    {
-                        Mail = _model.EmailAddress,
-                        Username = _model.Username,
-                        Password = _model.Password
-                    });
+                Mail = _model.EmailAddress,
+                Username = _model.Username,
+                Password = _model.Password
+            };
+            var userObj = await HttpClientService.CreateUserAsync(createUserRequest);
 
-                if (createUserResponseMessage.IsSuccessStatusCode)
+            if (userObj is not null)
+            {
+                Logger.LogInformation($"{userObj.Mail} is now created!");
+                Logger.LogInformation("Logging in automatically...");
+
+                var authRequest = new AuthenticateRequest
                 {
-                    Console.WriteLine("User was created!");
+                    Username = userObj.Mail,
+                    Password = _model.Password
+                };
+                var authenticationResponse = await HttpClientService.AuthenticateAsync(authRequest);
 
-                    var createUserRequest = await createUserResponseMessage.Content.ReadFromJsonAsync<CreateUserRequest>();
+                if (authenticationResponse is not null)
+                {
+                    _message = "Logged in success, redirecting!";
+                    await AuthStateProvider.MarkUserAsAuthenticated(authenticationResponse);
 
-                    Console.WriteLine($"Created User: {createUserRequest.Mail} : {createUserRequest.Password}");
+                    InitializeNewContext();
 
-                    _message = "Bruger blev oprettet.";
-
-                    // Login
-                    var logInRequestMessage = GetHttpRequest(
-                        HttpMethod.Post, 
-                        $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.AuthenticateEndpoint}");
-                    var logInResponseMessage = await client.PostAsJsonAsync(
-                        logInRequestMessage.RequestUri,
-                        new AuthenticateRequest
-                        {
-                            Username = _model.EmailAddress,
-                            Password = _model.Password
-                        });
-
-                    if (logInResponseMessage.IsSuccessStatusCode)
-                    {
-                        Console.WriteLine($"Logging In user after creation!");
-
-                        var authRes = await logInResponseMessage.Content.ReadFromJsonAsync<AuthenticateResponse>();
-
-                        Console.WriteLine($"");
-
-                        if (authRes.UserObject is not null)
-                        {
-                            Console.WriteLine($"Auth User: {authRes.UserObject.Id}");
-
-                            _message = "Logged in success, redirecting!";
-                            await AuthStateProvider.MarkUserAsAuthenticated(authRes);
-
-                            InitializeNewContext();
-
-                            NavigationManager.NavigateTo("/");
-                        }
-                        else
-                        {
-                            Console.WriteLine("Given user after creation was null.");
-
-                            _message = "Kunne ikke logge ind, venglist log ind manuelt.";
-                            NavigationManager.NavigateTo("/account/login");
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Couldn't authenticate user after creation. Status Code: {logInResponseMessage.StatusCode}");
-
-                        _message = "Kunne ikke autorisere bruger, beklager, venligst log ind manuelt.";
-                        NavigationManager.NavigateTo("/account/login");
-                    }
+                    NavigationManager.NavigateTo("/");
                 }
                 else
                 {
-                    _message = "Fejl, kunne ikke oprette bruger.";
+                    Logger.LogInformation("Given user after creation was null.");
+
+                    _message = "Kunne ikke logge ind, venglist log ind manuelt.";
+                    NavigationManager.NavigateTo("/account/login");
                 }
+            }
+            else
+            {
+                _message = "Fejl, kunne ikke oprette bruger.";
             }
         }
 
@@ -125,20 +83,6 @@ namespace BlazorServerWebsite.Pages.Account
             _model = new();
             _editContext = new(_model);
             _editContext.AddDataAnnotationsValidation();
-        }
-
-        private HttpRequestMessage GetHttpRequest(HttpMethod method, string requestEndpoint)
-        {
-            return new HttpRequestMessage(
-                method, new Uri(requestEndpoint));
-        }
-
-        private HttpClient GetHttpClient(string baseEndpoint)
-        {
-            var client = ClientFactory.CreateClient();
-            client.BaseAddress = new Uri(baseEndpoint);
-
-            return client;
         }
     }
 }
