@@ -70,6 +70,41 @@ namespace XPowerAPI.Controllers
                 return BadRequest(new { message = "Unknown error occurred. Device was not created." });
             }
         }
+        
+        [AllowAnonymous]
+        [HttpPost("IAmOnline")]
+        public async Task<IActionResult> DeviceOnline([FromBody] DeviceOnlineRequest onlineRequest)
+        {
+            try
+            {
+                if (onlineRequest is null)
+                {
+                    return BadRequest(new { message = "Invalid Device IAmOnline Request." });
+                }
+
+                if (UsingInvalidIpAddress(onlineRequest.IPAddress))
+                {
+                    return BadRequest(new { message = "Invalid Device IAmOnline Request, IPAddress not readable." });
+                }
+
+                IDevice device = await _deviceService.DeviceOnlineAsync(onlineRequest);
+
+                if (device is null)
+                {
+                    throw new NullReferenceException("An unexpected error occurred. The device could not be handled successfully.");
+                }
+
+                return Ok(device);
+            }
+            catch (NullReferenceException nullRefEx)
+            {
+                return BadRequest(nullRefEx.Message);
+            }
+            catch (Exception)
+            {
+                return BadRequest(new { message = "Unknown error occurred. Device was not set Online." });
+            }
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDeviceById(int id)
@@ -86,7 +121,7 @@ namespace XPowerAPI.Controllers
                     return NotFound(new { message = "No Device found." });
                 }
 
-                IDevice device = await _deviceService.GetDeviceById(id);
+                IDevice device = await _deviceService.GetDeviceByIdAsync(id);
 
                 if (device is null)
                 {
@@ -121,7 +156,7 @@ namespace XPowerAPI.Controllers
                     return BadRequest(new { message = "Invalid Device Update Request, IPAddress not readable." });
                 }
 
-                IDevice device = await _deviceService.UpdateDevice(updateRequest);
+                IDevice device = await _deviceService.UpdateDeviceAsync(updateRequest);
 
                 if (device is null)
                 {

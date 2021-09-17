@@ -24,14 +24,19 @@ namespace XPowerClassLibrary.Device.Services
             return await _repository.DeleteDeviceByIdAsync(id);
         }
 
-        public async Task<IDevice> GetDeviceById(int id)
+        public async Task<IDevice> DeviceOnlineAsync(DeviceOnlineRequest onlineRequest)
         {
-            return await _repository.GetDeviceById(id);
+            return await _repository.DeviceOnlineAsync(onlineRequest);
         }
 
-        public async Task<IDevice> UpdateDevice(UpdateDeviceRequest updateRequest)
+        public async Task<IDevice> GetDeviceByIdAsync(int id)
         {
-            return await _repository.UpdateDevice(updateRequest);
+            return await _repository.GetDeviceByIdAsync(id);
+        }
+
+        public async Task<IDevice> UpdateDeviceAsync(UpdateDeviceRequest updateRequest)
+        {
+            return await _repository.UpdateDeviceAsync(updateRequest);
         }
 
         //public async Task<DeviceConnectionState> GetDeviceConnectionState(int id)

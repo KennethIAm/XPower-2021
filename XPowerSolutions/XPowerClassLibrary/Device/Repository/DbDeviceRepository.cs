@@ -16,8 +16,8 @@ namespace XPowerClassLibrary.Device.Repository
             IDevice device = null;
 
             // Check if IP is unique from DB.
-            if (await DeviceIpAddressExists(request.DeviceIpAddress))
-                throw new Exception("A device with this IP already exists.");
+            //if (await DeviceIpAddressExists(request.DeviceIpAddress))
+            //    throw new Exception("A device with this IP already exists.");
 
             int entityId = 0;
 
@@ -31,6 +31,7 @@ namespace XPowerClassLibrary.Device.Repository
                     @DeviceTypeId = request.DeviceTypeId,
                     @Status = request.DeviceFunctionalStatus,
                     @State = request.DeviceConnectionState,
+                    @UniqueDeviceIdentifier = request.UniqueDeviceIdentifier,
                     @Name = request.DeviceName,
                     @IpAddress = request.DeviceIpAddress
                 };
@@ -72,7 +73,48 @@ namespace XPowerClassLibrary.Device.Repository
             return deviceDeletedSuccessfully;
         }
 
-        public async Task<IDevice> GetDeviceById(int id)
+        public async Task<IDevice> DeviceOnlineAsync(DeviceOnlineRequest onlineRequest)
+        {
+            IDevice device = null;
+
+            using (var conn = DeviceServiceFactory.GetSqlConnectionComplexSelect())
+            {
+                await conn.OpenAsync();
+
+                var procedure = "[SPFindDeviceByUniqueIdentifier]";
+                var values = new { @UniqueDeviceIdentifier = onlineRequest.UniqueDeviceIdentifier };
+
+                device = await conn.ExecuteScalarAsync<HardwareDevice>(procedure, values, commandType: CommandType.StoredProcedure);
+            }
+
+            // Create Device if still null.
+            if (device is null)
+            {
+                return await CreateDeviceAsync(new CreateDeviceRequest()
+                {                    
+                    DeviceName = "",
+                    DeviceIpAddress = onlineRequest.IPAddress,
+                    DeviceFunctionalStatus = DeviceFunctionalStatus.Disabled,
+                    DeviceConnectionState = DeviceConnectionState.Connected,
+                    UniqueDeviceIdentifier = onlineRequest.UniqueDeviceIdentifier,
+                    DeviceTypeId = onlineRequest.DeviceTypeId
+                });
+            }
+
+            // Update device if found.
+            return await UpdateDeviceAsync(new UpdateDeviceRequest()
+            {
+                DeviceId = device.Id,
+                DeviceName = device.Name,
+                DeviceIpAddress = onlineRequest.IPAddress,
+                DeviceFunctionalStatus = device.FunctionalStatus,
+                DeviceConnectionState = device.ConnectionState,
+                UniqueDeviceIdentifier = onlineRequest.UniqueDeviceIdentifier,
+                DeviceTypeId = onlineRequest.DeviceTypeId
+            });
+        }
+
+        public async Task<IDevice> GetDeviceByIdAsync(int id)
         {
             IDevice device = null;
 
@@ -86,20 +128,7 @@ namespace XPowerClassLibrary.Device.Repository
             return device;
         }
 
-        public async Task<DeviceConnectionState> GetDeviceConnectionState(int id)
-        {
-            IDevice device = null;
-
-            using (var conn = DeviceServiceFactory.GetSqlConnectionBasicReader())
-            {
-                await conn.OpenAsync();
-                device = await conn.GetAsync<HardwareDevice>(id);
-            }
-
-            return device.ConnectionState;
-        }
-
-        public async Task<IDevice> UpdateDevice(UpdateDeviceRequest updateRequest)
+        public async Task<IDevice> UpdateDeviceAsync(UpdateDeviceRequest updateRequest)
         {
             IDevice updatedDevice = null;
 
@@ -125,61 +154,74 @@ namespace XPowerClassLibrary.Device.Repository
             return updatedDevice;
         }
 
-        public async Task<DeviceConnectionState> UpdateDeviceConnectionState(int id, DeviceConnectionState state)
-        {
-            DeviceConnectionState deviceState;
+        //public async Task<DeviceConnectionState> UpdateDeviceConnectionState(int id, DeviceConnectionState state)
+        //{
+        //    DeviceConnectionState deviceState;
 
-            using (var conn = DeviceServiceFactory.GetSqlConnectionBasicReader())
-            {
-                await conn.OpenAsync();
+        //    using (var conn = DeviceServiceFactory.GetSqlConnectionBasicReader())
+        //    {
+        //        await conn.OpenAsync();
 
-                var procedure = "[SPUpdateDeviceConnectionState]";
-                var values = new { @ConnectionState = state };
+        //        var procedure = "[SPUpdateDeviceConnectionState]";
+        //        var values = new { @ConnectionState = state };
 
-                var updatedConnectionState = await conn.ExecuteScalarAsync<bool>(procedure, values, commandType: CommandType.StoredProcedure);
+        //        var updatedConnectionState = await conn.ExecuteScalarAsync<bool>(procedure, values, commandType: CommandType.StoredProcedure);
 
-                deviceState = updatedConnectionState == true ? state : DeviceConnectionState.Undefined;
-            }
+        //        deviceState = updatedConnectionState == true ? state : DeviceConnectionState.Undefined;
+        //    }
 
-            return deviceState;
-        }
+        //    return deviceState;
+        //}
 
-        public async Task<DeviceFunctionalStatus> UpdateDeviceStatus(int id, DeviceFunctionalStatus status)
-        {
-            DeviceFunctionalStatus functionalStatus;
+        //public async Task<DeviceFunctionalStatus> UpdateDeviceStatus(int id, DeviceFunctionalStatus status)
+        //{
+        //    DeviceFunctionalStatus functionalStatus;
 
-            using (var conn = DeviceServiceFactory.GetSqlConnectionBasicReader())
-            {
-                await conn.OpenAsync();
+        //    using (var conn = DeviceServiceFactory.GetSqlConnectionBasicReader())
+        //    {
+        //        await conn.OpenAsync();
 
-                var procedure = "[SPUpdateDeviceFunctionalStatus]";
-                var values = new { @FunctionalStatus = status };
+        //        var procedure = "[SPUpdateDeviceFunctionalStatus]";
+        //        var values = new { @FunctionalStatus = status };
 
-                var updatedConnectionState = await conn.ExecuteScalarAsync<bool>(procedure, values, commandType: CommandType.StoredProcedure);
+        //        var updatedConnectionState = await conn.ExecuteScalarAsync<bool>(procedure, values, commandType: CommandType.StoredProcedure);
 
-                functionalStatus = updatedConnectionState == true ? status : DeviceFunctionalStatus.Undefined;
-            }
+        //        functionalStatus = updatedConnectionState == true ? status : DeviceFunctionalStatus.Undefined;
+        //    }
 
-            return functionalStatus;
-        }
+        //    return functionalStatus;
+        //}
 
-        private async Task<bool> DeviceIpAddressExists(string ipAddress)
-        {
-            bool ipAddressExists;
+        //public async Task<DeviceConnectionState> GetDeviceConnectionState(int id)
+        //{
+        //    IDevice device = null;
 
-            using (var conn = DeviceServiceFactory.GetSqlConnectionComplexSelect())
-            {
-                await conn.OpenAsync();
+        //    using (var conn = DeviceServiceFactory.GetSqlConnectionBasicReader())
+        //    {
+        //        await conn.OpenAsync();
+        //        device = await conn.GetAsync<HardwareDevice>(id);
+        //    }
 
-                var procedure = "[SPDeviceIpAddressIsUnique]";
-                var values = new { @IpAddress = ipAddress };
+        //    return device.ConnectionState;
+        //}
 
-                var result = await conn.ExecuteScalarAsync<bool>(procedure, values, commandType: CommandType.StoredProcedure);
+        //private async Task<bool> DeviceIpAddressExists(string ipAddress)
+        //{
+        //    bool ipAddressExists;
 
-                ipAddressExists = result;
-            }
+        //    using (var conn = DeviceServiceFactory.GetSqlConnectionComplexSelect())
+        //    {
+        //        await conn.OpenAsync();
 
-            return ipAddressExists;
-        }
+        //        var procedure = "[SPDeviceIpAddressIsUnique]";
+        //        var values = new { @IpAddress = ipAddress };
+
+        //        var result = await conn.ExecuteScalarAsync<bool>(procedure, values, commandType: CommandType.StoredProcedure);
+
+        //        ipAddressExists = result;
+        //    }
+
+        //    return ipAddressExists;
+        //}
     }
 }

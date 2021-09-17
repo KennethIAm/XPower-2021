@@ -8,6 +8,7 @@ namespace XPowerClassLibrary.Device.Models
         IDeviceType DeviceType { get; }
         DeviceFunctionalStatus FunctionalStatus { get; }
         DeviceConnectionState ConnectionState { get; }
+        string UniqueDeviceIdentifier { get; }
         string Name { get; }
         string IpAddress { get; }
     }
