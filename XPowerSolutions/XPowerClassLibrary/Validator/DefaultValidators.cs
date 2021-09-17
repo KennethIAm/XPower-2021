@@ -44,6 +44,33 @@ namespace XPowerClassLibrary.Validator
                     new MaxLengthRule(500)
                 };
 
+
+        static private List<IValidationRule> unitNameRules = new List<IValidationRule>()
+                {
+                    new NullRule(),
+                    new NoEmptyStringRule(),
+                    new MinLengthRule(1),
+                    new MaxLengthRule(25),
+                    new NoSqlInjectionRule()
+                };
+        static private List<IValidationRule> unitTypeRules = new List<IValidationRule>()
+                {
+                    new NullRule(),
+                    new NoEmptyStringRule(),
+                    new MinLengthRule(1),
+                    new MaxLengthRule(20),
+                    new NoSqlInjectionRule()
+                };
+        static private List<IValidationRule> unitIDRules = new List<IValidationRule>()
+                {
+                    new NullRule(),
+                    new NoEmptyStringRule(),
+                    new NoSpacesRule(),
+                    new MinLengthRule(4),
+                    new MaxLengthRule(250),
+                    new NoSqlInjectionRule()
+                };
+
         /// <summary>
         /// Validates the mail.
         /// Throws exception if an error is reached.
@@ -148,5 +175,55 @@ namespace XPowerClassLibrary.Validator
             return validator.GetErrors();
         }
 
+        /// <summary>
+        /// Validates the unit name.
+        /// Throws exception if an error is reached.
+        /// </summary>
+        /// <param name="unitName">Unit name value to validate.</param>
+        static public void ValidateUnitNameException(string unitName)
+        {
+            Validator validator = new Validator("UnitName", unitNameRules);
+            if (!validator.Validate(unitName))
+            {
+                foreach (var exception in validator.GetExceptions())
+                {
+                    throw exception;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates the unit name.
+        /// Throws exception if an error is reached.
+        /// </summary>
+        /// <param name="unitID">Unit ID value to validate.</param>
+        static public void ValidateUnitIDException(string unitID)
+        {
+            Validator validator = new Validator("UnitID", unitIDRules);
+            if (!validator.Validate(unitID))
+            {
+                foreach (var exception in validator.GetExceptions())
+                {
+                    throw exception;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates the unit name.
+        /// Throws exception if an error is reached.
+        /// </summary>
+        /// <param name="unitType">Unit type value to validate.</param>
+        static public void ValidateUnitTypeException(string unitType)
+        {
+            Validator validator = new Validator("UnitType", unitTypeRules);
+            if (!validator.Validate(unitType))
+            {
+                foreach (var exception in validator.GetExceptions())
+                {
+                    throw exception;
+                }
+            }
+        }
     }
 }

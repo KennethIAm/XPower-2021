@@ -12,7 +12,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPowerAPI", "XPowerAPI\XPow
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorServerWebsite", "BlazorServerWebsite\BlazorServerWebsite.csproj", "{A8A46889-4211-485A-BD30-E982AA9F7A10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPowerAPITests", "XPowerAPITests\XPowerAPITests.csproj", "{09A077A2-7AB2-442D-AED8-9EEB71D21E7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPowerAPITests", "XPowerAPITests\XPowerAPITests.csproj", "{09A077A2-7AB2-442D-AED8-9EEB71D21E7F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

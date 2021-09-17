@@ -1,8 +1,44 @@
 ﻿@page "/"
 @attribute [Authorize]
-
 @*<h2 class="text-dark">@("Velkommen, " + _context.User.Identity.Name)</h2>*@
-<h4 class="text-dark text-center">Velkommen til XPower Solutions!</h4>
+@*<h4 class="text-dark text-center">Velkommen til XPower Solutions!</h4>
+<br />*@
+<div class="card bg-primary page-layout">
+    <br />
+    <h2 class="text-dark text-center text-light">[STED NAVN]</h2>
+    <br />
+    <h5 class="text-dark text-center text-light">Totalt strømforbrug</h5>
+
+    <div class="container">
+        <div class="column">
+            <h1 class="text-center text-light" style="font-weight: bold;">5</h1>
+            <p class="text-center text-light">KW/H</p>
+        </div>
+        <div class="column">
+            <h1 class="text-center text-light" style="font-weight: bold; color: red !important;">23</h1>
+            <p class="text-center text-light" style="color: red !important;">KR / KW/H</p>
+        </div>
+    </div>
+
+
+
+    <div class="text-center">
+        <DynamicNavigationButton DisplayText="Tilføj enhed" Route="/unit/addunit" />
+    </div>
+
+    <br />
+    <div style="padding-left: 20px; padding-right: 20px;">
+        <h4 class="text-dark text-center text-light">Test tekst, det her er bare for at teste. En test er en test er en test. En, to, tre, test den tekst. Teksttest. Bare tekst. Man kan ikke gå galt med tekst</h4>
+        <h4 class="text-dark text-center text-light">Velkommen til XPower Solutions!1</h4>
+        <h4 class="text-dark text-center text-light">Velkommen til XPower Solutions!1</h4>
+        <h4 class="text-dark text-center text-light">Velkommen til XPower Solutions!1</h4>
+        <h4 class="text-dark text-center text-light">Velkommen til XPower Solutions!1</h4>
+        <h4 class="text-dark text-center text-light">Velkommen til XPower Solutions!1</h4>
+        <h4 class="text-dark text-center text-light">Velkommen til XPower Solutions!1</h4>
+    </div>
+    <br />
+</div>
+<br />
 
 @code {
     [CascadingParameter] protected Task<AuthenticationState> AuthenticationState { get; set; }
@@ -12,4 +48,4 @@
     {
         _context = await AuthenticationState;
     }
-} 
+}
