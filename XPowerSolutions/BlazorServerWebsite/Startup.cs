@@ -1,6 +1,7 @@
 using Blazored.LocalStorage;
 using BlazorServerWebsite.Data;
 using BlazorServerWebsite.Data.Providers;
+using BlazorServerWebsite.Data.Services;
 using BlazorServerWebsite.Data.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,6 +45,7 @@ namespace BlazorServerWebsite
             services.AddBlazoredLocalStorage();
             services.AddAuthentication("Cookies").AddCookie();
 
+            services.AddScoped<IHttpClientService, HttpClientService>();
             services.AddScoped<AuthStateProvider>();
             services.AddScoped<AuthenticationStateProvider>(provider =>
                     provider.GetRequiredService<AuthStateProvider>());
