@@ -13,6 +13,6 @@ namespace XPowerClassLibrary.Device.Services
         Task<IDevice> UpdateDeviceAsync(UpdateDeviceRequest updateRequest);
         Task<IDevice> GetDeviceByIdAsync(int id);
         Task<bool> DeleteDeviceByIdAsync(int id);
-        Task<IDevice> DeviceOnlineAsync(DeviceOnlineRequest onlineRequest)
+        Task<IDevice> DeviceOnlineAsync(DeviceOnlineRequest onlineRequest);
     }
 }

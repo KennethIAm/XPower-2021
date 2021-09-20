@@ -3,7 +3,9 @@
 #include <ArduinoHttpClient.h>
 
 String UNIT_ID = "0001";
-IPAddress DEVICE_IP;
+String DEVICE_TYPE_ID = "2";
+String DEVICE_IP;
+
 char ssid[] = "prog";
 char pass[] = "Alvorlig5And";
 
@@ -42,7 +44,7 @@ void setup() {
   Serial.println(ip);
   server.begin();  
 
-  DEVICE_IP = ip;
+  DEVICE_IP = IpAddress2String(ip);
 
 
   apiConnectionError = false;
@@ -50,10 +52,12 @@ void setup() {
   //httpClient.get("/devices/IAmOnline");
 
   String contentType = "application/json; charset=UTF-8";
-  String postData = "DeviceTypeId=1&UniqueDeviceIdentifier=1234&IPAddress=10.108.138.79";
-
-  httpClient.get("/devices/IAmOnline?" + postData);
-  //httpClient.post("/devices/IAmOnline", contentType, postData);
+  String postData = "DeviceTypeId=" + DEVICE_TYPE_ID + "&UniqueDeviceIdentifier=" + UNIT_ID + "&IPAddress=" + DEVICE_IP;
+  String connectionEndpoint = "/devices/IAmOnline";
+  String postStringComplete = connectionEndpoint + "?" + postData;
+  Serial.println("Trying to reach URL: " + postStringComplete);
+  
+  httpClient.get(postStringComplete);
 
   // read the status code and body of the response
   int statusCode = httpClient.responseStatusCode();
@@ -62,14 +66,16 @@ void setup() {
   Serial.println(statusCode);
   
   if(statusCode == 200 || statusCode == 203){  
-    String response = httpClient.responseBody();
-    
-    Serial.print("Response: ");
-    Serial.println(response);
+
   }
   else{
     apiConnectionError = true;
   }
+
+    String response = httpClient.responseBody();
+    
+    Serial.print("Response: ");
+    Serial.println(response);
   
 }
 
@@ -108,13 +114,26 @@ void loop() {
            //Translate the user request and check to switch on or off the fan
            if (readString.indexOf("?function1") >0){
                Serial.println("Function 1 has been called.");
-               digitalWrite(13, HIGH);
-               client.println("HTTP/1.1 204 OK"); 
+               run_function_1();
+
+
+                String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nFUNCTION1 RUN";
+                s += "</html>\n";
+                
+                
+                client.print(s);
+               
+               //client.println("HTTP/1.1 204 OK"); 
            }
            else if (readString.indexOf("?function2") >0){
                Serial.println("Function 2 has been called.");
-               digitalWrite(13, LOW);
-               client.println("HTTP/1.1 204 OK"); 
+               run_function_2();
+
+                String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nFUNCTION2 RUN";
+                s += "</html>\n";
+                client.print(s);
+               
+               
            }
            else if(readString == ""){
               client.println("<!DOCTYPE HTML>");
@@ -128,7 +147,12 @@ void loop() {
            }
            else{
               Serial.println("Bad Request - Unkown command called: " + readString);
-              client.println("HTTP/1.1 400 Bad Request");     
+              //client.println("HTTP/1.1 400 Bad Request");     
+
+              String s = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nUnkown command";
+              s += "</html>\n";
+              client.print(s);
+              
            }
 
             //clearing string for next read
@@ -158,4 +182,21 @@ void connect_to_wifi(char ssid[], char pass[]) {
   }
 
   Serial.println("Connected to " + String(ssid) + " WiFi!");
+}
+
+String IpAddress2String(const IPAddress& ipAddress)
+{
+    return String(ipAddress[0]) + String(".") +
+           String(ipAddress[1]) + String(".") +
+           String(ipAddress[2]) + String(".") +
+           String(ipAddress[3]);
+}
+
+
+void run_function_1(){
+  digitalWrite(13, HIGH);
+}
+
+void run_function_2(){
+  digitalWrite(13, LOW);
 }
