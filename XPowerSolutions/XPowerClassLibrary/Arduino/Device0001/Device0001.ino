@@ -55,7 +55,6 @@ void setup() {
   Serial.println(statusCode);
   Serial.print("Response: ");
   Serial.println(response);
-  Serial.println("Wait five seconds");
   
 }
 
