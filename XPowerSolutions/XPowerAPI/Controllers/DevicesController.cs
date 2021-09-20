@@ -72,8 +72,8 @@ namespace XPowerAPI.Controllers
         }
         
         [AllowAnonymous]
-        [HttpPost("IAmOnline")]
-        public async Task<IActionResult> DeviceOnline([FromBody] DeviceOnlineRequest onlineRequest)
+        [HttpGet("IAmOnline")]
+        public async Task<IActionResult> DeviceOnline([FromQuery] DeviceOnlineRequest onlineRequest)
         {
             try
             {
@@ -82,7 +82,7 @@ namespace XPowerAPI.Controllers
                     return BadRequest(new { message = "Invalid Device IAmOnline Request." });
                 }
 
-                if (UsingInvalidIpAddress(onlineRequest.IPAddress))
+                if (!UsingInvalidIpAddress(onlineRequest.IPAddress))
                 {
                     return BadRequest(new { message = "Invalid Device IAmOnline Request, IPAddress not readable." });
                 }
