@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Device.Models;
 using XPowerClassLibrary.Device.Services;
@@ -18,10 +19,12 @@ namespace XPowerAPI.Controllers
     public class DevicesController : BaseController
     {
         private readonly IDeviceService _deviceService;
+        private readonly IHttpClientFactory _clientFactory;
 
-        public DevicesController(IDeviceService deviceService)
+        public DevicesController(IDeviceService deviceService, IHttpClientFactory clientFactory)
         {
             _deviceService = deviceService;
+            _clientFactory = clientFactory;
         }
 
         [HttpPost()]
@@ -39,7 +42,7 @@ namespace XPowerAPI.Controllers
                     return BadRequest(new { message = "Invalid Device Request." });
                 }
 
-                if (UsingInvalidIpAddress(request.DeviceIpAddress))
+                if (UsingValidIpAddress(request.DeviceIpAddress))
                 {
                     return BadRequest(new { message = "Invalid Device Request, IPAddress not readable." });
                 }
@@ -82,7 +85,7 @@ namespace XPowerAPI.Controllers
                     return BadRequest(new { message = "Invalid Device IAmOnline Request." });
                 }
 
-                if (!UsingInvalidIpAddress(onlineRequest.IPAddress))
+                if (!UsingValidIpAddress(onlineRequest.IPAddress))
                 {
                     return BadRequest(new { message = "Invalid Device IAmOnline Request, IPAddress not readable." });
                 }
@@ -100,9 +103,10 @@ namespace XPowerAPI.Controllers
             {
                 return BadRequest(nullRefEx.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest(new { message = "Unknown error occurred. Device was not set Online." });
+                //return BadRequest(new { message = "Unknown error occurred. Device was not set Online." });
+                return BadRequest(ex.Message);
             }
         }
 
@@ -130,9 +134,32 @@ namespace XPowerAPI.Controllers
 
                 return Ok(device);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest(new { message = "Unknown error occurred. Device not found." });
+                //return BadRequest(new { message = "Unknown error occurred. Device not found." });
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("send-command")]
+        public async Task<IActionResult> SendDeviceCommand([FromQuery] string command, string ipAddress)
+        {
+            try
+            {
+                var uri = new Uri($"http://{ipAddress}");
+                var response = await _clientFactory.CreateClient().GetAsync($"{uri}?{command}", HttpCompletionOption.ResponseHeadersRead);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return Ok();
+                }
+
+                return NotFound("Command not found.");
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest($"Couldn't execute device command: {ex.Message}");
             }
         }
 
@@ -151,7 +178,7 @@ namespace XPowerAPI.Controllers
                     return BadRequest(new { message = "Invalid Device Update Request." });
                 }
 
-                if (UsingInvalidIpAddress(updateRequest.DeviceIpAddress))
+                if (UsingValidIpAddress(updateRequest.DeviceIpAddress))
                 {
                     return BadRequest(new { message = "Invalid Device Update Request, IPAddress not readable." });
                 }
@@ -220,9 +247,20 @@ namespace XPowerAPI.Controllers
             return string.IsNullOrEmpty(token) || string.IsNullOrWhiteSpace(token);
         }
 
-        private bool UsingInvalidIpAddress(string ipAddress)
+        private bool UsingValidIpAddress(string ipAddress)
         {
-            return IPAddress.TryParse(ipAddress, out IPAddress parsedAddress);
+            try
+            {
+                var address = IPAddress.Parse(ipAddress);
+
+                Console.WriteLine($"New Device with : {address}");
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

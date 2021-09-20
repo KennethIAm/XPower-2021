@@ -1,23 +1,37 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Dapper.Contrib.Extensions;
+using System.ComponentModel.DataAnnotations.Schema;
 using XPowerClassLibrary.Device.Enums;
 using XPowerClassLibrary.Device.Models;
 
 namespace XPowerClassLibrary.Device.Entities
 {
+    [Dapper.Contrib.Extensions.Table("Devices")]
     public class HardwareDevice : IDevice
     {
         [Key]
+        [Column("DeviceID")]
         public int Id { get; set; }
-        public IDeviceType DeviceType { get; set; }
+
+        public DeviceType DeviceType { get; set; }
+
+        [Column("Status")]
         public DeviceFunctionalStatus FunctionalStatus { get; set; }
+
+        [Column("State")]
         public DeviceConnectionState ConnectionState { get; set; }
+
+        [Column("UniqueDeviceIdentifier")]
         public string UniqueDeviceIdentifier { get; set; }
+
+        [Column("DeviceName")]
         public string Name { get; set; }
-        public string IpAddress { get; set; }
+
+        [Column("IPAddress")]
+        public string IPAddress { get; set; }
 
         public HardwareDevice() { }
 
-        public HardwareDevice(int id, IDeviceType deviceType, DeviceFunctionalStatus functionalStatus, DeviceConnectionState connectionState, string uniqueDeviceIdentifier, string name, string ipAddress)
+        public HardwareDevice(int id, DeviceType deviceType, DeviceFunctionalStatus functionalStatus, DeviceConnectionState connectionState, string uniqueDeviceIdentifier, string name, string ipAddress)
         {
             Id = id;
             DeviceType = deviceType;
@@ -25,7 +39,7 @@ namespace XPowerClassLibrary.Device.Entities
             ConnectionState = connectionState;
             UniqueDeviceIdentifier = uniqueDeviceIdentifier;
             Name = name;
-            IpAddress = ipAddress;
+            IPAddress = ipAddress;
         }
     }
 }
