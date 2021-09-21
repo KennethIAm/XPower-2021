@@ -8,6 +8,8 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System;
 using XPowerClassLibrary.Users;
+using XPowerClassLibrary.Device.Services;
+using XPowerClassLibrary.Device;
 
 namespace XPowerAPI
 {
@@ -55,6 +57,7 @@ namespace XPowerAPI
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>(x => (UserService)UserServiceFactory.GetUserServiceDB());
+            services.AddScoped<IDeviceService, DeviceService>(deviceService => (DeviceService)DeviceServiceFactory.GetDeviceServiceDB());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

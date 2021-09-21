@@ -33,7 +33,7 @@ namespace XPowerClassLibrary.Device.Repository
                     @State = request.DeviceConnectionState,
                     @UniqueDeviceIdentifier = request.UniqueDeviceIdentifier,
                     @Name = request.DeviceName,
-                    @IpAddress = request.DeviceIpAddress
+                    @IPAddress = request.DeviceIpAddress
                 };
 
                 entityId = await conn.ExecuteScalarAsync<int>(procedure, values, commandType: CommandType.StoredProcedure);
@@ -46,7 +46,7 @@ namespace XPowerClassLibrary.Device.Repository
                 {
                     await conn.OpenAsync();
 
-                    device = await conn.GetAsync<HardwareDevice>(entityId);
+                    device = await conn.GetAsync<DeviceInformationView>(entityId);
                 }
             }
 
@@ -81,10 +81,10 @@ namespace XPowerClassLibrary.Device.Repository
             {
                 await conn.OpenAsync();
 
-                var procedure = "[SPFindDeviceByUniqueIdentifier]";
+                var procedure = "[SPFindDeviceByUniqueDeviceIdentifier]";
                 var values = new { @UniqueDeviceIdentifier = onlineRequest.UniqueDeviceIdentifier };
 
-                device = await conn.ExecuteScalarAsync<HardwareDevice>(procedure, values, commandType: CommandType.StoredProcedure);
+                device = await conn.QuerySingleOrDefaultAsync<DeviceInformationView>(procedure, values, commandType: CommandType.StoredProcedure);
             }
 
             // Create Device if still null.
@@ -118,11 +118,14 @@ namespace XPowerClassLibrary.Device.Repository
         {
             IDevice device = null;
 
-            using (var conn = DeviceServiceFactory.GetSqlConnectionBasicReader())
+            using (var conn = DeviceServiceFactory.GetSqlConnectionComplexSelect())
             {
                 await conn.OpenAsync();
 
-                device = await conn.GetAsync<HardwareDevice>(id);
+                var procedure = "[SPGetDeviceById]";
+                var values = new { @Id = id };
+
+                device = await conn.QuerySingleOrDefaultAsync<DeviceInformationView>(procedure, values, commandType: CommandType.StoredProcedure);
             }
 
             return device;
@@ -131,8 +134,9 @@ namespace XPowerClassLibrary.Device.Repository
         public async Task<IDevice> UpdateDeviceAsync(UpdateDeviceRequest updateRequest)
         {
             IDevice updatedDevice = null;
+            bool deviceIsUpdated = false;
 
-            using (var conn = DeviceServiceFactory.GetSqlConnectionBasicReader())
+            using (var conn = DeviceServiceFactory.GetSqlConnectionUpdateDevice())
             {
                 await conn.OpenAsync();
 
@@ -140,16 +144,17 @@ namespace XPowerClassLibrary.Device.Repository
                 var values = new { 
                     @Id = updateRequest.DeviceId,
                     @DeviceTypeId = updateRequest.DeviceTypeId,
-                    @FunctionalStatus = updateRequest.DeviceFunctionalStatus,
-                    @ConnectionState = updateRequest.DeviceConnectionState,
+                    @Status = updateRequest.DeviceFunctionalStatus,
+                    @State = updateRequest.DeviceConnectionState,
+                    @UniqueDeviceIdentifier = updateRequest.UniqueDeviceIdentifier,
                     @Name = updateRequest.DeviceName,
-                    @IpAddress = updateRequest.DeviceIpAddress
+                    @IPAddress = updateRequest.DeviceIpAddress
                 };
 
-                var updatedConnectionState = await conn.ExecuteScalarAsync<bool>(procedure, values, commandType: CommandType.StoredProcedure);
+                deviceIsUpdated = await conn.ExecuteScalarAsync<bool>(procedure, values, commandType: CommandType.StoredProcedure);
 
-                updatedDevice = updatedConnectionState == true ? await conn.GetAsync<HardwareDevice>(updateRequest.DeviceId) : null;
             }
+            updatedDevice = deviceIsUpdated == true ? await GetDeviceByIdAsync(updateRequest.DeviceId) : null;
 
             return updatedDevice;
         }
