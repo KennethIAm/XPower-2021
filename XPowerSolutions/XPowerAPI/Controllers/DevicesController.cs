@@ -210,6 +210,30 @@ namespace XPowerAPI.Controllers
             }
         }
 
+        [HttpPut("assign-to-me")]
+        public async Task<IActionResult> AssignDeviceToUser([FromBody] AssignDeviceToUserRequest assignDeviceRequest)
+        {
+            try
+            {
+                if (assignDeviceRequest is null)
+                    return BadRequest("Invalid Data Given.");
+
+                if (assignDeviceRequest.UserId <= 0 || assignDeviceRequest.DeviceId <= 0)
+                    return NotFound("Data couldn't be found.");
+
+                IDevice assignedDevice = await _deviceService.AssignDeviceToUserAsync(assignDeviceRequest);
+
+                if (assignedDevice is null)
+                    return BadRequest("Something went wrong while assigning device to user.");
+
+                return Ok(assignedDevice);
+            }
+            catch (Exception)
+            {
+                return BadRequest("An error occurred. Couldn't handle the request.");
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDevice(int id)
         {
