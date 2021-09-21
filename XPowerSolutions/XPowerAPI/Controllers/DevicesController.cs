@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Device.Models;
 using XPowerClassLibrary.Device.Services;
@@ -18,10 +19,12 @@ namespace XPowerAPI.Controllers
     public class DevicesController : BaseController
     {
         private readonly IDeviceService _deviceService;
+        private readonly IHttpClientFactory _clientFactory;
 
-        public DevicesController(IDeviceService deviceService)
+        public DevicesController(IDeviceService deviceService, IHttpClientFactory clientFactory)
         {
             _deviceService = deviceService;
+            _clientFactory = clientFactory;
         }
 
         [HttpPost("CreateDevice")]
@@ -39,7 +42,7 @@ namespace XPowerAPI.Controllers
                     return BadRequest(new { message = "Invalid Device Request." });
                 }
 
-                if (UsingInvalidIpAddress(request.DeviceIpAddress))
+                if (UsingValidIpAddress(request.DeviceIpAddress))
                 {
                     return BadRequest(new { message = "Invalid Device Request, IPAddress not readable." });
                 }
@@ -70,6 +73,42 @@ namespace XPowerAPI.Controllers
                 return BadRequest(new { message = "Unknown error occurred. Device was not created." });
             }
         }
+        
+        [AllowAnonymous]
+        [HttpGet("IAmOnline")]
+        public async Task<IActionResult> DeviceOnline([FromQuery] DeviceOnlineRequest onlineRequest)
+        {
+            try
+            {
+                if (onlineRequest is null)
+                {
+                    return BadRequest(new { message = "Invalid Device IAmOnline Request." });
+                }
+
+                if (!UsingValidIpAddress(onlineRequest.IPAddress))
+                {
+                    return BadRequest(new { message = "Invalid Device IAmOnline Request, IPAddress not readable." });
+                }
+
+                IDevice device = await _deviceService.DeviceOnlineAsync(onlineRequest);
+
+                if (device is null)
+                {
+                    throw new NullReferenceException("An unexpected error occurred. The device could not be handled successfully.");
+                }
+
+                Console.WriteLine($"{onlineRequest.IPAddress} is now Online {onlineRequest.UniqueDeviceIdentifier}");
+                return Ok(device);
+            }
+            catch (NullReferenceException nullRefEx)
+            {
+                return BadRequest(nullRefEx.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDeviceById(int id)
@@ -86,7 +125,7 @@ namespace XPowerAPI.Controllers
                     return NotFound(new { message = "No Device found." });
                 }
 
-                IDevice device = await _deviceService.GetDeviceById(id);
+                IDevice device = await _deviceService.GetDeviceByIdAsync(id);
 
                 if (device is null)
                 {
@@ -95,9 +134,31 @@ namespace XPowerAPI.Controllers
 
                 return Ok(device);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest(new { message = "Unknown error occurred. Device not found." });
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("send-command")]
+        public async Task<IActionResult> SendDeviceCommand([FromQuery] string command, string ipAddress)
+        {
+            try
+            {
+                var uri = new Uri($"http://{ipAddress}");
+                var response = await _clientFactory.CreateClient().GetAsync($"{uri}?{command}", HttpCompletionOption.ResponseHeadersRead);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return Ok();
+                }
+
+                return NotFound("Command not found.");
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest($"Couldn't execute device command: {ex.Message}");
             }
         }
 
@@ -116,12 +177,12 @@ namespace XPowerAPI.Controllers
                     return BadRequest(new { message = "Invalid Device Update Request." });
                 }
 
-                if (UsingInvalidIpAddress(updateRequest.DeviceIpAddress))
+                if (UsingValidIpAddress(updateRequest.DeviceIpAddress))
                 {
                     return BadRequest(new { message = "Invalid Device Update Request, IPAddress not readable." });
                 }
 
-                IDevice device = await _deviceService.UpdateDevice(updateRequest);
+                IDevice device = await _deviceService.UpdateDeviceAsync(updateRequest);
 
                 if (device is null)
                 {
@@ -145,6 +206,30 @@ namespace XPowerAPI.Controllers
             catch (Exception)
             {
                 return BadRequest(new { message = "Unknown error occurred. Device was not updated." });
+            }
+        }
+
+        [HttpPut("assign-to-me")]
+        public async Task<IActionResult> AssignDeviceToUser([FromBody] AssignDeviceToUserRequest assignDeviceRequest)
+        {
+            try
+            {
+                if (assignDeviceRequest is null)
+                    return BadRequest("Invalid Data Given.");
+
+                if (assignDeviceRequest.UserId <= 0 || assignDeviceRequest.DeviceId <= 0)
+                    return NotFound("Data couldn't be found.");
+
+                IDevice assignedDevice = await _deviceService.AssignDeviceToUserAsync(assignDeviceRequest);
+
+                if (assignedDevice is null)
+                    return BadRequest("Something went wrong while assigning device to user.");
+
+                return Ok(assignedDevice);
+            }
+            catch (Exception)
+            {
+                return BadRequest("An error occurred. Couldn't handle the request.");
             }
         }
 
@@ -185,9 +270,18 @@ namespace XPowerAPI.Controllers
             return string.IsNullOrEmpty(token) || string.IsNullOrWhiteSpace(token);
         }
 
-        private bool UsingInvalidIpAddress(string ipAddress)
+        private bool UsingValidIpAddress(string ipAddress)
         {
-            return IPAddress.TryParse(ipAddress, out IPAddress parsedAddress);
+            try
+            {
+                var address = IPAddress.Parse(ipAddress);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

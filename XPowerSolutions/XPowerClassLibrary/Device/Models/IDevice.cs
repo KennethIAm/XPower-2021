@@ -1,14 +1,16 @@
-﻿using XPowerClassLibrary.Device.Enums;
+﻿using XPowerClassLibrary.Device.Entities;
+using XPowerClassLibrary.Device.Enums;
 
 namespace XPowerClassLibrary.Device.Models
 {
     public interface IDevice
     {
         int Id { get; }
-        IDeviceType DeviceType { get; }
+        DeviceType DeviceType { get; }
         DeviceFunctionalStatus FunctionalStatus { get; }
         DeviceConnectionState ConnectionState { get; }
+        string UniqueDeviceIdentifier { get; }
         string Name { get; }
-        string IpAddress { get; }
+        string IPAddress { get; }
     }
 }
