@@ -33,7 +33,6 @@ namespace BlazorServerWebsite.Pages.Device
             InitializeNewContext();
         }
 
-        //private async Task OnValidForm_AuthenticateAccountRegisterAsync()
         private async Task OnValidForm_AddDeviceAsync()
         {
             _message = "";
@@ -59,23 +58,26 @@ namespace BlazorServerWebsite.Pages.Device
 
                 var createDeviceResponseMessage = await client.PostAsJsonAsync(endpoint, createDeviceRequest);
 
-                _message = createDeviceResponseMessage.IsSuccessStatusCode.ToString();
+                if (createDeviceResponseMessage.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Device was created!");
 
-                //if (createDeviceResponseMessage.IsSuccessStatusCode)
-                //{
-                //    Console.WriteLine("Device was created!");
+                    var deviceCreated = await createDeviceResponseMessage.Content.ReadFromJsonAsync<IDevice>();
 
-                //    var deviceCreated = await createDeviceResponseMessage.Content.ReadFromJsonAsync<IDevice>();
+                    Console.WriteLine($"Created Device: {createDeviceRequest.DeviceName} : {createDeviceRequest.DeviceTypeId}");
 
-                //    Console.WriteLine($"Created Device: {createDeviceRequest.DeviceName} : {createDeviceRequest.DeviceTypeId}");
-
-                //    _message = "Enheden er blevet registreret.";
-                //}
-                //else
-                //{
-                //    _message = "Fejl, kunne ikke registrere enheden.";
-                //}
+                    _message = "Enheden er blevet registreret.";
+                }
+                else
+                {
+                    _message = "Fejl, kunne ikke registrere enheden.";
+                }
             }
+        }
+
+        protected void GoToIndex()
+        {
+            NavigationManager.NavigateTo("/");
         }
 
         private void InitializeNewContext()

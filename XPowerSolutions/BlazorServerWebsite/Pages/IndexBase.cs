@@ -11,6 +11,7 @@ namespace BlazorServerWebsite.Pages
 {
     public partial class IndexBase : ComponentBase
     {
+        [Inject] protected NavigationManager NavigationManager { get; set; }
         [CascadingParameter] protected Task<AuthenticationState> AuthenticationState { get; set; }
         private AuthenticationState _context;
 
@@ -20,6 +21,11 @@ namespace BlazorServerWebsite.Pages
         {
             await LoadDevices();
             _context = await AuthenticationState;
+        }
+
+        protected void GoToCreateDevice()
+        {
+            NavigationManager.NavigateTo("/device/registerdevice");
         }
 
         private async Task LoadDevices()

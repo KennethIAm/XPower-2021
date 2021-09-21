@@ -16,6 +16,7 @@ namespace BlazorServerWebsite.Pages.Device
 {
     public partial class ViewDevicePageBase : ComponentBase
     {
+        [Inject] protected NavigationManager NavigationManager { get; set; }
         [Inject] protected IHttpClientFactory ClientFactory { get; set; }
         [Inject] protected ISettings Settings { get; set; }
 
@@ -137,8 +138,6 @@ namespace BlazorServerWebsite.Pages.Device
                 userDevice = JsonConvert.DeserializeObject<HardwareDevice>(response.Content.ToString());
             }
         }
-
-
 
         private HttpRequestMessage GetHttpRequest(HttpMethod method, string requestEndpoint)
         {
