@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Device.Models;
+using XPowerClassLibrary.Device.Models.Requests;
 using XPowerClassLibrary.Device.Services;
 using XPowerClassLibrary.Validator;
 
@@ -107,6 +108,35 @@ namespace XPowerAPI.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("mine")]
+        public async Task<IActionResult> GetUsersDevices([FromBody] UserDevicesRequest devicesRequest)
+        {
+            try
+            {
+                if (devicesRequest is null)
+                    return BadRequest("Invalid data.");
+
+                if (string.IsNullOrEmpty(devicesRequest.RefreshToken))
+                    return BadRequest("Couldn't authorize request. Invalid token.");
+
+                var usersDevices = await _deviceService.GetUsersOwnedDevices(devicesRequest);
+
+                if (usersDevices is null)
+                    return NotFound("Couldn't find any owned devices.");
+
+                return Ok(usersDevices);
+            }
+            catch (NullReferenceException)
+            {
+                return BadRequest("An error ocurred while collection the user.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return BadRequest("An unhandled exception occurred, couldn't successfully complete request.");
             }
         }
 

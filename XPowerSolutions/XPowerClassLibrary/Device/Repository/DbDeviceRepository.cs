@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using XPowerClassLibrary.Device.Enums;
 using XPowerClassLibrary.Device.Models;
 using XPowerClassLibrary.Device.Entities;
+using XPowerClassLibrary.Device.Models.Requests;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace XPowerClassLibrary.Device.Repository
 {
@@ -160,6 +163,28 @@ namespace XPowerClassLibrary.Device.Repository
             }
 
             return device;
+        }
+
+        /// <summary>
+        /// Gets the users owned devices by a user id.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<IDevice>> GetUsersOwnedDevices(int userId)
+        {
+            IEnumerable<IDevice> devices = null;
+
+            using (var conn = DeviceServiceFactory.GetSqlConnectionComplexSelect())
+            {
+                await conn.OpenAsync();
+
+                var procedure = "[SPGetUsersOwnedDevices]";
+                var values = new { @UserId = userId };
+
+                devices = await conn.QueryAsync<DeviceInformationView>(procedure, values, commandType: CommandType.StoredProcedure);
+            }
+
+            return devices;
         }
 
         public async Task<IDevice> UpdateDeviceAsync(UpdateDeviceRequest updateRequest)
