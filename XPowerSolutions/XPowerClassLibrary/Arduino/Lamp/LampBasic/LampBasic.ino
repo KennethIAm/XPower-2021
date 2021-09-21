@@ -1,30 +1,34 @@
 #include <SPI.h>        //Libraries required to communicate with the arduino ethernet shield
 #include <WiFi101.h>
 #include <ArduinoHttpClient.h>
+#include "arduino_secrets.h"
 
-String UNIT_ID = "0001";
+String UNIT_ID = SECRET_DEVICE_ID;
 String DEVICE_TYPE_ID = "2";
+char serverAddress[] = SECRET_API_ROOT;  // server address
+int port = 80;
+int ERROR_PIN = 10;
+char ssid[] = SECRET_WIFI_SSID;
+char pass[] = SECRET_WIFI_PASS;
+
+
+// Voltage meassure properties 
+#define VT_PIN A0
+#define AT_PIN A1
+
+// Wifi properties
+WiFiClient wifi_client;
 String DEVICE_IP;
 
-char ssid[] = "prog";
-char pass[] = "Alvorlig5And";
+// Websocket functions.
+WiFiServer server(80);  //Server port    
 
-int pos = 0; 
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0x3F, 0xFE, 0xED };   //physical mac address
-byte ip[] = { 192,168,56,100 };                        //ip in lan (that's what you need to use in your browser. ("192.168.56.100")
-WiFiServer server(80);                             //Server port    
-WiFiClient wifi_client;
 
 // API functionality
-char serverAddress[] = "0357-93-176-82-58.ngrok.io";  // server address
-int port = 80;
-HttpClient httpClient = HttpClient(wifi_client, serverAddress, port);
-
-bool apiConnectionError = false;
-
-String readString;            //HTTP request read
-
-int ERROR_PIN = 10;
+HttpClient httpClient = HttpClient(wifi_client, serverAddress, port); 
+bool apiConnectionError = false;  // Holds the current errorstatus of the api connection.
+String readString;                //HTTP request read.
+String deviceOnlineEndpoint = "/devices/IAmOnline";
 
 void setup() {
  // Open serial monitor and wait for port to open
@@ -33,10 +37,63 @@ void setup() {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
 
+  // Run device specific setup
+  device_setup();
+
+  // Connect to Wifi.
+  connect_to_wifi(ssid, pass);
+  // Send startup message to API.
+  call_startup_api();
+}
+
+
+void loop() {
+  
+  if(apiConnectionError == true){
+    display_error_mode();
+    return;
+  }
+  
+  run_websocket();
+}
+
+void device_setup(){
   pinMode(13, OUTPUT);
   pinMode(ERROR_PIN, OUTPUT);
+}
 
-  connect_to_wifi(ssid, pass);
+void run_function_0(){
+  Serial.println(ShowKwh());
+}
+
+void run_function_1(){
+  digitalWrite(13, HIGH);
+}
+
+void run_function_2(){
+  digitalWrite(13, LOW);
+}
+
+
+
+
+
+// WiFi functionality
+
+// Connects to wifi and displays the wifi message in console.
+void connect_to_wifi(char ssid[], char pass[]) {
+  int wifi_status = WL_IDLE_STATUS;
+  
+  Serial.println("Attempting to connect to WPA Network...");
+  Serial.println("Connecting to SSID : " + String(ssid));
+  wifi_status = WiFi.begin(ssid, pass);   // Get status of the wifi.
+
+  if ( wifi_status != WL_CONNECTED ) {
+    Serial.println("Couldn't connect to selected WPA Network.");
+    return;
+  }
+
+  Serial.println("Connected to " + String(ssid) + " WiFi!");
 
   // print your WiFi shield's IP address:
   IPAddress ip = WiFi.localIP();
@@ -46,14 +103,40 @@ void setup() {
 
   DEVICE_IP = IpAddress2String(ip);
 
+}
 
-  apiConnectionError = false;
+// Converts IPAddress object to string.
+String IpAddress2String(const IPAddress& ipAddress)
+{
+    return String(ipAddress[0]) + String(".") +
+           String(ipAddress[1]) + String(".") +
+           String(ipAddress[2]) + String(".") +
+           String(ipAddress[3]);
+}
+
+// Display error, by blinking the error lamp.
+void display_error_mode(){
+  if(apiConnectionError == true)
+  {
+    if(digitalRead(ERROR_PIN) == HIGH){
+      digitalWrite(ERROR_PIN, LOW);
+    }
+    else{
+      digitalWrite(ERROR_PIN, HIGH);
+    }
+    delay(1000);
+  }
+}
+
+
+// Connect and send startup message to API
+void call_startup_api(){
+    apiConnectionError = false;
   Serial.println("making API request");
-  //httpClient.get("/devices/IAmOnline");
 
   String contentType = "application/json; charset=UTF-8";
   String postData = "DeviceTypeId=" + DEVICE_TYPE_ID + "&UniqueDeviceIdentifier=" + UNIT_ID + "&IPAddress=" + DEVICE_IP;
-  String connectionEndpoint = "/devices/IAmOnline";
+  String connectionEndpoint = deviceOnlineEndpoint;
   String postStringComplete = connectionEndpoint + "?" + postData;
   Serial.println("Trying to reach URL: " + postStringComplete);
   
@@ -65,36 +148,20 @@ void setup() {
   Serial.print("Status code: ");
   Serial.println(statusCode);
   
-  if(statusCode == 200 || statusCode == 203){  
-
-  }
-  else{
+  if(statusCode != 200 && statusCode != 203){  
     apiConnectionError = true;
   }
 
-    String response = httpClient.responseBody();
-    
-    Serial.print("Response: ");
-    Serial.println(response);
+  String response = httpClient.responseBody();
   
+  Serial.print("Response: ");
+  Serial.println(response);
 }
 
 
-void loop() {
+// Websocket functionality
+void run_websocket(){
   // Check for client request
-  
-  if(apiConnectionError == true){
-
-    if(digitalRead(ERROR_PIN) == HIGH){
-      digitalWrite(ERROR_PIN, LOW);
-    }
-    else{
-      digitalWrite(ERROR_PIN, HIGH);
-    }
-    delay(1000);
-    return;
-  }
-  
   WiFiClient client = server.available();
   
   if (client) {                    //If client request arrived read the request
@@ -106,16 +173,26 @@ void loop() {
           readString += c;  
          }
 
- // Server WEB PAGE if requested by user      
+          // Server WEB PAGE if requested by user      
           if (c == '\n') {          
             //Serial.println(readString); 
             //html file 
+
+            //Translate the user request and check to switch on or off the fan
+           if (readString.indexOf("?function0") >0){
+                Serial.println("Function 1 has been called.");
+                run_function_0();
+
+                String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nFUNCTION0 RUN";
+                s += "</html>\n";
+                
+                client.print(s);
+           }
            
            //Translate the user request and check to switch on or off the fan
            if (readString.indexOf("?function1") >0){
-               Serial.println("Function 1 has been called.");
-               run_function_1();
-
+                Serial.println("Function 1 has been called.");
+                run_function_1();
 
                 String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nFUNCTION1 RUN";
                 s += "</html>\n";
@@ -128,14 +205,17 @@ void loop() {
            else if (readString.indexOf("?function2") >0){
                Serial.println("Function 2 has been called.");
                run_function_2();
+               //client.println("HTTP/1.1 204 OK"); 
 
+              
+                
                 String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nFUNCTION2 RUN";
                 s += "</html>\n";
                 client.print(s);
                
                
            }
-           else if(readString == ""){
+           else if(readString == "" || readString == "/"){
               client.println("<!DOCTYPE HTML>");
               
               client.println("<html>");
@@ -169,34 +249,21 @@ void loop() {
 }
 
 
-void connect_to_wifi(char ssid[], char pass[]) {
-  int wifi_status = WL_IDLE_STATUS;
-  
-  Serial.println("Attempting to connect to WPA Network...");
-  Serial.println("Connecting to SSID : " + String(ssid));
-  wifi_status = WiFi.begin(ssid, pass);   // Get status of the wifi.
+float ShowKwh(){
+  int vt_read = analogRead(VT_PIN);
+  int at_read = analogRead(AT_PIN);
 
-  if ( wifi_status != WL_CONNECTED ) {
-    Serial.println("Couldn't connect to selected WPA Network.");
-    return;
-  }
+ 
 
-  Serial.println("Connected to " + String(ssid) + " WiFi!");
-}
+  float voltage = vt_read * (5.0 / 1024.0) * 5;
+  float current = at_read * (5.0 / 1024.0) * 2.0;
+  float watts = voltage * current;
 
-String IpAddress2String(const IPAddress& ipAddress)
-{
-    return String(ipAddress[0]) + String(".") +
-           String(ipAddress[1]) + String(".") +
-           String(ipAddress[2]) + String(".") +
-           String(ipAddress[3]);
-}
+ 
 
+  // Find calculation for Kwh
 
-void run_function_1(){
-  digitalWrite(13, HIGH);
-}
+ 
 
-void run_function_2(){
-  digitalWrite(13, LOW);
+  return watts;
 }

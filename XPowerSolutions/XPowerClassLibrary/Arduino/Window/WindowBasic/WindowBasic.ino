@@ -2,38 +2,34 @@
 #include <WiFi101.h>
 #include <ArduinoHttpClient.h>
 #include <Servo.h>  
+#include "arduino_secrets.h"
 
-
-String UNIT_ID = "0002";
+String UNIT_ID = SECRET_DEVICE_ID;
 String DEVICE_TYPE_ID = "3";
-
-String DEVICE_IP;
-
-char ssid[] = "prog";
-char pass[] = "Alvorlig5And";
-
-int pos = 0; 
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0x3F, 0xFE, 0xED };   //physical mac address
-byte ip[] = { 192,168,56,100 };                        //ip in lan (that's what you need to use in your browser. ("192.168.56.100")
-WiFiServer server(80);                             //Server port    
-WiFiClient wifi_client;
-
-// API functionality
-char serverAddress[] = "0357-93-176-82-58.ngrok.io";  // server address
+char serverAddress[] = SECRET_API_ROOT;  // server address
 int port = 80;
-HttpClient httpClient = HttpClient(wifi_client, serverAddress, port);
-
-bool apiConnectionError = false;
-
-String readString;            //HTTP request read
-
 int ERROR_PIN = 10;
+char ssid[] = SECRET_WIFI_SSID;
+char pass[] = SECRET_WIFI_PASS;
 
 // Servo functionality specific to window
 Servo myservo;  // create servo object to control a servo
 byte OPEN_WINDOW_VALUE = 180;
 byte CLOSED_WINDOW_VALUE = 0;
 
+// Wifi properties
+WiFiClient wifi_client;
+String DEVICE_IP;
+
+// Websocket functions.
+WiFiServer server(80);  //Server port    
+
+
+// API functionality
+HttpClient httpClient = HttpClient(wifi_client, serverAddress, port); 
+bool apiConnectionError = false;  // Holds the current errorstatus of the api connection.
+String readString;                //HTTP request read.
+String deviceOnlineEndpoint = "/devices/IAmOnline";
 
 void setup() {
  // Open serial monitor and wait for port to open
@@ -42,9 +38,63 @@ void setup() {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
 
+  // Run device specific setup
+  device_setup();
+
+  // Connect to Wifi.
+  connect_to_wifi(ssid, pass);
+  // Send startup message to API.
+  call_startup_api();
+}
+
+
+void loop() {
+  
+  if(apiConnectionError == true){
+    display_error_mode();
+    return;
+  }
+  
+  run_websocket();
+}
+
+void device_setup(){
   myservo.attach(10);  // attaches the servo on pin 9 to the servo object
   pinMode(ERROR_PIN, OUTPUT);
-  connect_to_wifi(ssid, pass);
+}
+
+void run_function_0(){
+  
+}
+
+void run_function_1(){
+  myservo.write(OPEN_WINDOW_VALUE);
+}
+
+void run_function_2(){
+  myservo.write(CLOSED_WINDOW_VALUE);
+}
+
+
+
+
+
+// WiFi functionality
+
+// Connects to wifi and displays the wifi message in console.
+void connect_to_wifi(char ssid[], char pass[]) {
+  int wifi_status = WL_IDLE_STATUS;
+  
+  Serial.println("Attempting to connect to WPA Network...");
+  Serial.println("Connecting to SSID : " + String(ssid));
+  wifi_status = WiFi.begin(ssid, pass);   // Get status of the wifi.
+
+  if ( wifi_status != WL_CONNECTED ) {
+    Serial.println("Couldn't connect to selected WPA Network.");
+    return;
+  }
+
+  Serial.println("Connected to " + String(ssid) + " WiFi!");
 
   // print your WiFi shield's IP address:
   IPAddress ip = WiFi.localIP();
@@ -52,17 +102,42 @@ void setup() {
   Serial.println(ip);
   server.begin();  
 
-  
   DEVICE_IP = IpAddress2String(ip);
 
+}
 
-  apiConnectionError = false;
+// Converts IPAddress object to string.
+String IpAddress2String(const IPAddress& ipAddress)
+{
+    return String(ipAddress[0]) + String(".") +
+           String(ipAddress[1]) + String(".") +
+           String(ipAddress[2]) + String(".") +
+           String(ipAddress[3]);
+}
+
+// Display error, by blinking the error lamp.
+void display_error_mode(){
+  if(apiConnectionError == true)
+  {
+    if(digitalRead(ERROR_PIN) == HIGH){
+      digitalWrite(ERROR_PIN, LOW);
+    }
+    else{
+      digitalWrite(ERROR_PIN, HIGH);
+    }
+    delay(1000);
+  }
+}
+
+
+// Connect and send startup message to API
+void call_startup_api(){
+    apiConnectionError = false;
   Serial.println("making API request");
-  //httpClient.get("/devices/IAmOnline");
 
   String contentType = "application/json; charset=UTF-8";
   String postData = "DeviceTypeId=" + DEVICE_TYPE_ID + "&UniqueDeviceIdentifier=" + UNIT_ID + "&IPAddress=" + DEVICE_IP;
-  String connectionEndpoint = "/devices/IAmOnline";
+  String connectionEndpoint = deviceOnlineEndpoint;
   String postStringComplete = connectionEndpoint + "?" + postData;
   Serial.println("Trying to reach URL: " + postStringComplete);
   
@@ -74,10 +149,7 @@ void setup() {
   Serial.print("Status code: ");
   Serial.println(statusCode);
   
-  if(statusCode == 200 || statusCode == 203){  
-
-  }
-  else{
+  if(statusCode != 200 && statusCode != 203){  
     apiConnectionError = true;
   }
 
@@ -85,30 +157,12 @@ void setup() {
   
   Serial.print("Response: ");
   Serial.println(response);
-  
 }
 
 
-void loop() {
+// Websocket functionality
+void run_websocket(){
   // Check for client request
-
-/*
- * // Error message to blink error lamp.
-  if(apiConnectionError == true){
-
-    if(digitalRead(ERROR_PIN) == HIGH){
-      digitalWrite(ERROR_PIN, LOW);
-    }
-    else{
-      digitalWrite(ERROR_PIN, HIGH);
-    }
-    delay(1000);
-    return;
-  }
-*/
-
-  
-  
   WiFiClient client = server.available();
   
   if (client) {                    //If client request arrived read the request
@@ -120,10 +174,21 @@ void loop() {
           readString += c;  
          }
 
- // Server WEB PAGE if requested by user      
+          // Server WEB PAGE if requested by user      
           if (c == '\n') {          
             //Serial.println(readString); 
             //html file 
+
+            //Translate the user request and check to switch on or off the fan
+           if (readString.indexOf("?function0") >0){
+                Serial.println("Function 1 has been called.");
+                run_function_0();
+
+                String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nFUNCTION0 RUN";
+                s += "</html>\n";
+                
+                client.print(s);
+           }
            
            //Translate the user request and check to switch on or off the fan
            if (readString.indexOf("?function1") >0){
@@ -151,7 +216,7 @@ void loop() {
                
                
            }
-           else if(readString == ""){
+           else if(readString == "" || readString == "/"){
               client.println("<!DOCTYPE HTML>");
               
               client.println("<html>");
@@ -182,37 +247,4 @@ void loop() {
        }
     }
   }
-}
-
-
-void connect_to_wifi(char ssid[], char pass[]) {
-  int wifi_status = WL_IDLE_STATUS;
-  
-  Serial.println("Attempting to connect to WPA Network...");
-  Serial.println("Connecting to SSID : " + String(ssid));
-  wifi_status = WiFi.begin(ssid, pass);   // Get status of the wifi.
-
-  if ( wifi_status != WL_CONNECTED ) {
-    Serial.println("Couldn't connect to selected WPA Network.");
-    return;
-  }
-
-  Serial.println("Connected to " + String(ssid) + " WiFi!");
-}
-
-void run_function_1(){
-  myservo.write(OPEN_WINDOW_VALUE);
-}
-
-void run_function_2(){
-  myservo.write(CLOSED_WINDOW_VALUE);
-}
-
-
-String IpAddress2String(const IPAddress& ipAddress)
-{
-    return String(ipAddress[0]) + String(".") +
-           String(ipAddress[1]) + String(".") +
-           String(ipAddress[2]) + String(".") +
-           String(ipAddress[3]);
 }
