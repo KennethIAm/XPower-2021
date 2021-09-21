@@ -97,6 +97,7 @@ namespace XPowerAPI.Controllers
                     throw new NullReferenceException("An unexpected error occurred. The device could not be handled successfully.");
                 }
 
+                Console.WriteLine($"{onlineRequest.IPAddress} is now Online {onlineRequest.UniqueDeviceIdentifier}");
                 return Ok(device);
             }
             catch (NullReferenceException nullRefEx)
@@ -105,7 +106,6 @@ namespace XPowerAPI.Controllers
             }
             catch (Exception ex)
             {
-                //return BadRequest(new { message = "Unknown error occurred. Device was not set Online." });
                 return BadRequest(ex.Message);
             }
         }
@@ -136,7 +136,6 @@ namespace XPowerAPI.Controllers
             }
             catch (Exception ex)
             {
-                //return BadRequest(new { message = "Unknown error occurred. Device not found." });
                 return BadRequest(ex.Message);
             }
         }
@@ -276,8 +275,6 @@ namespace XPowerAPI.Controllers
             try
             {
                 var address = IPAddress.Parse(ipAddress);
-
-                Console.WriteLine($"New Device with : {address}");
 
                 return true;
             }
