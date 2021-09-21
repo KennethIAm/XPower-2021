@@ -13,27 +13,32 @@ namespace XPowerClassLibrary.Device.Repository
     {
         public async Task<IDevice> AssignDeviceToUserAsync(AssignDeviceToUserRequest assignDeviceRequest)
         {
+            var deviceIsNotAssignedToAnyUser = await DeviceIsNotAssignedToAny(assignDeviceRequest.UniqueDeviceIdentifier);
+
+            if (deviceIsNotAssignedToAnyUser is false)
+                throw new DuplicateNameException("Device is already assigned to a user.");
+
             IDevice device = null;
-            bool deviceIsAssigned = false;
+            int assignedDeviceId = 0;
 
             using (var conn = DeviceServiceFactory.GetSqlConnectionUpdateDevice())
             {
                 await conn.OpenAsync();
-                var proc = "[SPAssingDeviceToUser]";
+                var proc = "[SPAssignDeviceToUser]";
                 var values = new
                 {
                     @UserId = assignDeviceRequest.UserId,
-                    @DeviceId = assignDeviceRequest.DeviceId,
+                    @UniqueDeviceIdentifier = assignDeviceRequest.UniqueDeviceIdentifier,
                     @DeviceName = assignDeviceRequest.DeviceName,
                     @DeviceTypeId = assignDeviceRequest.DeviceTypeId
                 };
 
-                deviceIsAssigned = await conn.ExecuteScalarAsync<bool>(proc, values, commandType: CommandType.StoredProcedure);
+                assignedDeviceId = await conn.ExecuteScalarAsync<int>(proc, values, commandType: CommandType.StoredProcedure);
             }
 
-            if (deviceIsAssigned)
+            if (assignedDeviceId > 0)
             {
-                device = await GetDeviceByIdAsync(assignDeviceRequest.DeviceId);
+                device = await GetDeviceByIdAsync(assignedDeviceId);
 
                 return device;
             }
@@ -136,7 +141,7 @@ namespace XPowerClassLibrary.Device.Repository
                 DeviceFunctionalStatus = device.FunctionalStatus,
                 DeviceConnectionState = device.ConnectionState,
                 UniqueDeviceIdentifier = onlineRequest.UniqueDeviceIdentifier,
-                DeviceTypeId = onlineRequest.DeviceTypeId
+                DeviceTypeId = device.DeviceType.Id
             });
         }
 
@@ -182,6 +187,26 @@ namespace XPowerClassLibrary.Device.Repository
             IDevice updatedDevice = deviceIsUpdated == true ? await GetDeviceByIdAsync(updateRequest.DeviceId) : null;
 
             return updatedDevice;
+        }
+
+        private async Task<bool> DeviceIsNotAssignedToAny(string uniqueDeviceIdentifier)
+        {
+            bool isDeviceAssigned = false;
+
+            using (var conn = DeviceServiceFactory.GetSqlConnectionComplexSelect())
+            {
+                await conn.OpenAsync();
+
+                var proc = "[SPDeviceIsNotAssignedToAny]";
+                var values = new
+                {
+                    @UniqueDeviceIdentifier = uniqueDeviceIdentifier
+                };
+
+                isDeviceAssigned = await conn.ExecuteScalarAsync<bool>(proc, values, commandType: CommandType.StoredProcedure);
+            }
+
+            return isDeviceAssigned;
         }
     }
 }
