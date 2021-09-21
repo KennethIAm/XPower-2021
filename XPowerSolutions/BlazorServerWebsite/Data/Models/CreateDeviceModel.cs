@@ -7,31 +7,29 @@ using XPowerClassLibrary.Validator;
 
 namespace BlazorServerWebsite.Data.Models
 {
-    public class RegisterUnitModel
+    public class CreateDeviceModel
     {
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Indtast venligst et gyldigt ID.")]
         [Range(0, int.MaxValue, ErrorMessage = "Et ID kan kun indeholde heltal.")]
-        public string ID { get; set; }
+        public string Id { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Indtast venligst enhedens navn.")]
         [MinLength(1, ErrorMessage = "Enhedens navn opfylder ikke vores navngivningskrav. Skal være minimum 1 karakter langt.")]
         [MaxLength(25, ErrorMessage = "Enhedens navn opfylder ikke vores navngivningskrav. Må maksimalt være 25 karakterer langt.")]
         public string Name { get; set; }
-        
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Indtast venligst en gyldigt IP.")]
-        public string IP { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Indtast venligst enhedens navn.")]
-        [MinLength(1, ErrorMessage = "Enhedens navn opfylder ikke vores navngivningskrav. Skal være minimum 1 karakter langt.")]
-        [MaxLength(25, ErrorMessage = "Enhedens navn opfylder ikke vores navngivningskrav. Må maksimalt være 25 karakterer langt.")]
+        [MinLength(1, ErrorMessage = "Enhedens type opfylder ikke vores navngivningskrav. Skal være minimum 1 karakter langt.")]
+        [MaxLength(25, ErrorMessage = "Enhedens type opfylder ikke vores navngivningskrav. Må maksimalt være 25 karakterer langt.")]
+        [Range(0, int.MaxValue, ErrorMessage = "Et ID kan kun indeholde heltal.")]
         public string Type { get; set; }
 
         public bool IsIDValid()
         {
             try
             {
-                DefaultValidators.ValidateUnitIDException(Name);
+                DefaultValidators.ValidateDeviceIDException(Name);
                 return true;
             }
             catch (Exception)
@@ -44,7 +42,7 @@ namespace BlazorServerWebsite.Data.Models
         {
             try
             {
-                DefaultValidators.ValidateUnitNameException(Name);
+                DefaultValidators.ValidateDeviceNameException(Name);
                 return true;
             }
             catch (Exception)
@@ -57,7 +55,7 @@ namespace BlazorServerWebsite.Data.Models
         {
             try
             {
-                DefaultValidators.ValidateUnitTypeException(Name);
+                DefaultValidators.ValidateDeviceTypeException(Name);
                 return true;
             }
             catch (Exception)

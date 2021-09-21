@@ -24,7 +24,7 @@ namespace XPowerAPI.Controllers
             _deviceService = deviceService;
         }
 
-        [HttpPost()]
+        [HttpPost("CreateDevice")]
         public async Task<IActionResult> CreateDevice([FromBody] CreateDeviceRequest request)
         {
             try

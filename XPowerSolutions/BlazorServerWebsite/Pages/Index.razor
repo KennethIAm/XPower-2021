@@ -1,4 +1,5 @@
 ﻿@page "/"
+@inherits IndexBase
 @attribute [Authorize]
 @*<h2 class="text-dark">@("Velkommen, " + _context.User.Identity.Name)</h2>*@
 @*<h4 class="text-dark text-center">Velkommen til XPower Solutions!</h4>
@@ -23,29 +24,47 @@
 
 
     <div class="text-center">
-        <DynamicNavigationButton DisplayText="Tilføj enhed" Route="/unit/addunit" />
+        <DynamicNavigationButton DisplayText="Tilføj enhed" Route="/device/registerdevice" />
     </div>
 
     <br />
     <div style="padding-left: 20px; padding-right: 20px;">
         <h4 class="text-dark text-center text-light">Test tekst, det her er bare for at teste. En test er en test er en test. En, to, tre, test den tekst. Teksttest. Bare tekst. Man kan ikke gå galt med tekst</h4>
-        <h4 class="text-dark text-center text-light">Velkommen til XPower Solutions!1</h4>
-        <h4 class="text-dark text-center text-light">Velkommen til XPower Solutions!1</h4>
-        <h4 class="text-dark text-center text-light">Velkommen til XPower Solutions!1</h4>
-        <h4 class="text-dark text-center text-light">Velkommen til XPower Solutions!1</h4>
-        <h4 class="text-dark text-center text-light">Velkommen til XPower Solutions!1</h4>
-        <h4 class="text-dark text-center text-light">Velkommen til XPower Solutions!1</h4>
+
+        <table class="table text-light">
+            <thead>
+                <tr>
+                    <th scope="col">Enhed</th>
+                    <th scope="col" width="100px">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var device in UserDevices)
+                {
+
+                    <tr>
+                        <td>
+                            <a style="color: white;" href="/device/viewdevice/@device.Id">
+                                @device.Name
+                            </a>
+                        </td>
+                        @if (device.FunctionalStatus == XPowerClassLibrary.Device.Enums.DeviceFunctionalStatus.Off)
+                        {
+                            <td style="color:red">Slukket</td>
+                        }
+                        else if (device.FunctionalStatus == XPowerClassLibrary.Device.Enums.DeviceFunctionalStatus.On)
+                        {
+                            <td style="color:lawngreen">Tændt</td>
+                        }
+                        else
+                        {
+                            <td>Status ukendt</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
     <br />
 </div>
 <br />
-
-@code {
-    [CascadingParameter] protected Task<AuthenticationState> AuthenticationState { get; set; }
-    private AuthenticationState _context;
-
-    protected override async Task OnInitializedAsync()
-    {
-        _context = await AuthenticationState;
-    }
-}

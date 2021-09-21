@@ -11,11 +11,12 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Users.Models;
-using XPowerClassLibrary.Unit.Models;
+using XPowerClassLibrary.Device.Models;
+using XPowerClassLibrary.Device.Enums;
 
-namespace BlazorServerWebsite.Pages.Units
+namespace BlazorServerWebsite.Pages.Device
 {
-    public partial class UnitAdd : ComponentBase
+    public partial class AddDevicePage : ComponentBase
     {
         [Inject] protected IHttpClientFactory ClientFactory { get; set; }
         [Inject] protected AuthStateProvider AuthStateProvider { get; set; }
@@ -23,7 +24,7 @@ namespace BlazorServerWebsite.Pages.Units
         [Inject] protected ISettings Settings { get; set; }
         [Inject] protected IJSRuntime JSRuntime { get; set; }
 
-        private RegisterUnitModel _model;
+        private CreateDeviceModel _model;
         private EditContext _editContext;
         private string _message = string.Empty;
 
@@ -33,7 +34,7 @@ namespace BlazorServerWebsite.Pages.Units
         }
 
         //private async Task OnValidForm_AuthenticateAccountRegisterAsync()
-        private async Task OnValidForm_AddUnitAsync()
+        private async Task OnValidForm_AddDeviceAsync()
         {
             _message = "";
 
@@ -43,37 +44,37 @@ namespace BlazorServerWebsite.Pages.Units
                 return;
             }
 
-            var client = GetHttpClient(Settings.Endpoints.BaseEndpoint);
-
-            using (client)
+            using (var client = GetHttpClient(Settings.Endpoints.BaseEndpoint))
             {
-                // Register Unit POST.
-                var registerUnitRequestMessage = GetHttpRequest(
-                    HttpMethod.Post,
-                    $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.RegisterUnitEndpoint}");
-                var registerUnitResponseMessage = await client.PostAsJsonAsync(
-                registerUnitRequestMessage.RequestUri,
-                    new RegisterUnitModel
-                    {
-                        ID = _model.ID,
-                        Name = _model.Name,
-                        Type = _model.Type
-                    });
-
-                if (registerUnitResponseMessage.IsSuccessStatusCode)
+                var endpoint = $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.CreateDeviceEndpoint}";
+                var requestMessage = GetHttpRequest(HttpMethod.Post, endpoint);
+                var createDeviceRequest = new CreateDeviceRequest
                 {
-                    Console.WriteLine("Unit was created!");
+                    DeviceName = _model.Name,
+                    DeviceIpAddress = "Temp",
+                    DeviceConnectionState = new DeviceConnectionState(),
+                    DeviceFunctionalStatus = new DeviceFunctionalStatus(),
+                    DeviceTypeId = Convert.ToInt32(_model.Type)
+                };
 
-                    var registerUnitRequest = await registerUnitResponseMessage.Content.ReadFromJsonAsync<RegisterUnitRequest>();
+                var createDeviceResponseMessage = await client.PostAsJsonAsync(endpoint, createDeviceRequest);
 
-                    Console.WriteLine($"Created Unit: {registerUnitRequest.Name} : {registerUnitRequest.Type}");
+                _message = createDeviceResponseMessage.IsSuccessStatusCode.ToString();
 
-                    _message = "Enheden er blevet registreret.";
-                }
-                else
-                {
-                    _message = "Fejl, kunne ikke registrere enheden.";
-                }
+                //if (createDeviceResponseMessage.IsSuccessStatusCode)
+                //{
+                //    Console.WriteLine("Device was created!");
+
+                //    var deviceCreated = await createDeviceResponseMessage.Content.ReadFromJsonAsync<IDevice>();
+
+                //    Console.WriteLine($"Created Device: {createDeviceRequest.DeviceName} : {createDeviceRequest.DeviceTypeId}");
+
+                //    _message = "Enheden er blevet registreret.";
+                //}
+                //else
+                //{
+                //    _message = "Fejl, kunne ikke registrere enheden.";
+                //}
             }
         }
 
