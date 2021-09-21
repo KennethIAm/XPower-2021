@@ -27,7 +27,7 @@ namespace XPowerClassLibrary.Device.Repository
                 var proc = "[SPAssignDeviceToUser]";
                 var values = new
                 {
-                    @UserId = assignDeviceRequest.UserId,
+                    @UserTokenRequest = assignDeviceRequest.UserTokenRequest,
                     @UniqueDeviceIdentifier = assignDeviceRequest.UniqueDeviceIdentifier,
                     @DeviceName = assignDeviceRequest.DeviceName,
                     @DeviceTypeId = assignDeviceRequest.DeviceTypeId

@@ -209,7 +209,6 @@ namespace XPowerAPI.Controllers
             }
         }
 
-        [AllowAnonymous]
         [HttpPut("assign-to-me")]
         public async Task<IActionResult> AssignDeviceToUser([FromBody] AssignDeviceToUserRequest assignDeviceRequest)
         {
@@ -218,7 +217,7 @@ namespace XPowerAPI.Controllers
                 if (assignDeviceRequest is null)
                     return BadRequest("Invalid Data Given.");
 
-                if (assignDeviceRequest.UserId <= 0 || string.IsNullOrEmpty(assignDeviceRequest.UniqueDeviceIdentifier))
+                if (string.IsNullOrEmpty(assignDeviceRequest.UserTokenRequest) || string.IsNullOrEmpty(assignDeviceRequest.UniqueDeviceIdentifier))
                     return NotFound("Data couldn't be found.");
 
                 IDevice assignedDevice = await _deviceService.AssignDeviceToUserAsync(assignDeviceRequest);
