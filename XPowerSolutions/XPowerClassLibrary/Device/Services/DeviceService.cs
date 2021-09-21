@@ -14,6 +14,11 @@ namespace XPowerClassLibrary.Device.Services
             _repository = repository;
         }
 
+        public async Task<IDevice> AssignDeviceToUserAsync(AssignDeviceToUserRequest assignDeviceRequest)
+        {
+            return await _repository.AssignDeviceToUserAsync(assignDeviceRequest);
+        }
+
         public async Task<IDevice> CreateDeviceAsync(CreateDeviceRequest request)
         {
             return await _repository.CreateDeviceAsync(request);
@@ -38,20 +43,5 @@ namespace XPowerClassLibrary.Device.Services
         {
             return await _repository.UpdateDeviceAsync(updateRequest);
         }
-
-        //public async Task<DeviceConnectionState> GetDeviceConnectionState(int id)
-        //{
-        //    return await _repository.GetDeviceConnectionState(id);
-        //}
-
-        //public async Task<DeviceConnectionState> UpdateDeviceConnectionState(int id, DeviceConnectionState state)
-        //{
-        //    return await _repository.UpdateDeviceConnectionState(id, state);
-        //}
-
-        //public async Task<DeviceFunctionalStatus> UpdateDeviceStatus(int id, DeviceFunctionalStatus status)
-        //{
-        //    return await _repository.UpdateDeviceStatus(id, status);
-        //}
     }
 }
