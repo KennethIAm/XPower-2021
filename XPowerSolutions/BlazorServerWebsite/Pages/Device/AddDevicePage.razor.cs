@@ -71,9 +71,9 @@ namespace BlazorServerWebsite.Pages.Device
 
             var assignDeviceRequest = new AssignDeviceToUserRequest
             {
-                UniqueDeviceIdentifier = "0003",
-                DeviceTypeId = 2,
-                DeviceName = "TestName",
+                UniqueDeviceIdentifier = _model.Id,
+                DeviceTypeId = Convert.ToInt32(_model.Type),
+                DeviceName = _model.Name,
                 UserTokenRequest = token
             };
 
