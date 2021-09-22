@@ -113,17 +113,16 @@ namespace XPowerAPI.Controllers
         }
 
         [HttpGet("mine")]
-        public async Task<IActionResult> GetUsersDevices([FromBody] UserDevicesRequest devicesRequest)
+        public async Task<IActionResult> GetUsersDevices()
         {
             try
             {
-                if (devicesRequest is null)
-                    return BadRequest(GenerateExceptionMessage("Invalid data."));
+                var token = GetCurrentUserToken();
 
-                if (string.IsNullOrEmpty(devicesRequest.RefreshToken))
+                if (UsingInvalidRefreshToken())
                     return BadRequest(GenerateExceptionMessage("Couldn't authorize request. Invalid token."));
 
-                var usersDevices = await _deviceService.GetUsersOwnedDevices(devicesRequest);
+                var usersDevices = await _deviceService.GetUsersOwnedDevices(new UserDevicesRequest { RefreshToken = token });
 
                 if (usersDevices is null)
                     return NotFound(GenerateExceptionMessage("Couldn't find any owned devices."));
