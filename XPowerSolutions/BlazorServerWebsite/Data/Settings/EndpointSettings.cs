@@ -12,7 +12,7 @@ namespace BlazorServerWebsite.Data.Settings
         public string CreateUserEndpoint { get; set; }
         public string RefreshTokenEndpoint { get; set; }
         public string LogOutEndpoint { get; set; }
-        public string CreateDeviceEndpoint { get; set; }
+        public string AssignDeviceEndpoint { get; set; }
         public string GetDeviceByIdEndpoint { get; set; }
         public string ChangeDeviceStatusEndpoint { get; set; }
     }

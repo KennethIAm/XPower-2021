@@ -13,6 +13,10 @@ using System.Threading.Tasks;
 using XPowerClassLibrary.Users.Models;
 using XPowerClassLibrary.Device.Models;
 using XPowerClassLibrary.Device.Enums;
+using Blazored.LocalStorage;
+using XPowerClassLibrary.Device.Entities;
+using System.Net.Http.Headers;
+using System.Net;
 
 namespace BlazorServerWebsite.Pages.Device
 {
@@ -21,10 +25,11 @@ namespace BlazorServerWebsite.Pages.Device
         [Inject] protected IHttpClientFactory ClientFactory { get; set; }
         [Inject] protected AuthStateProvider AuthStateProvider { get; set; }
         [Inject] protected NavigationManager NavigationManager { get; set; }
+        [Inject] protected ILocalStorageService LocalStorage { get; set; }
         [Inject] protected ISettings Settings { get; set; }
         [Inject] protected IJSRuntime JSRuntime { get; set; }
 
-        private CreateDeviceModel _model;
+        private AssignDeviceModel _model;
         private EditContext _editContext;
         private string _message = string.Empty;
 
@@ -32,6 +37,7 @@ namespace BlazorServerWebsite.Pages.Device
         {
             InitializeNewContext();
         }
+
 
         private async Task OnValidForm_AddDeviceAsync()
         {
@@ -43,34 +49,69 @@ namespace BlazorServerWebsite.Pages.Device
                 return;
             }
 
-            using (var client = GetHttpClient(Settings.Endpoints.BaseEndpoint))
+            string token = await LocalStorage.GetItemAsync<string>(Settings.RefreshTokenKey);
+            string jwtToken = await LocalStorage.GetItemAsync<string>(Settings.JwtKey);
+
+
+
+            var cookieContainer = new CookieContainer();
+            using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
             {
-                var endpoint = $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.CreateDeviceEndpoint}";
-                var requestMessage = GetHttpRequest(HttpMethod.Post, endpoint);
-                var createDeviceRequest = new CreateDeviceRequest
+                using (var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) })
                 {
-                    DeviceName = _model.Name,
-                    DeviceIpAddress = "Temp",
-                    DeviceConnectionState = new DeviceConnectionState(),
-                    DeviceFunctionalStatus = new DeviceFunctionalStatus(),
-                    DeviceTypeId = Convert.ToInt32(_model.Type)
-                };
+                    client.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", jwtToken);
+                    cookieContainer.Add(new Uri(Settings.Endpoints.BaseEndpoint), new Cookie("refreshToken", token));
 
-                var createDeviceResponseMessage = await client.PostAsJsonAsync(endpoint, createDeviceRequest);
+                    var response = await client.PostAsJsonAsync(Settings.Endpoints.RefreshTokenEndpoint, token);
 
-                if (createDeviceResponseMessage.IsSuccessStatusCode)
-                {
-                    Console.WriteLine("Device was created!");
 
-                    var deviceCreated = await createDeviceResponseMessage.Content.ReadFromJsonAsync<IDevice>();
-
-                    Console.WriteLine($"Created Device: {createDeviceRequest.DeviceName} : {createDeviceRequest.DeviceTypeId}");
-
-                    _message = "Enheden er blevet registreret.";
+                    AuthenticateResponse authenticateResponseRefresh = response.Content.ReadAsAsync<AuthenticateResponse>().Result;
+                    token = authenticateResponseRefresh.RefreshToken;
+                    await LocalStorage.SetItemAsync<string>(Settings.RefreshTokenKey, token);
                 }
-                else
+            }
+
+
+
+
+            cookieContainer = new CookieContainer();
+            using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
+            {
+                using (var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) })
                 {
-                    _message = "Fejl, kunne ikke registrere enheden.";
+                    var endpoint = $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.AssignDeviceEndpoint}";
+                    var assignDeviceRequest = new AssignDeviceToUserRequest
+                    {
+                        UniqueDeviceIdentifier = _model.Id,
+                        DeviceTypeId = Convert.ToInt32(_model.Type),
+                        DeviceName = _model.Name,
+                        UserTokenRequest = token
+                    };
+                    
+                    client.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", jwtToken);
+                    cookieContainer.Add(new Uri(Settings.Endpoints.BaseEndpoint), new Cookie("refreshToken", token));
+
+                    var createDeviceResponseMessage = await client.PutAsJsonAsync(endpoint, assignDeviceRequest);
+
+                    if (createDeviceResponseMessage.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("Device was created!");
+
+                        var deviceCreated = await createDeviceResponseMessage.Content.ReadFromJsonAsync<HardwareDevice>();
+
+                        Console.WriteLine($"Created Device: {assignDeviceRequest.DeviceName} : {assignDeviceRequest.DeviceTypeId}");
+
+                        _message = "Enheden er blevet registreret.";
+
+                        System.Threading.Thread.Sleep(3000);
+                        GoToIndex();
+                    }
+                    else
+                    {
+                        _message = createDeviceResponseMessage.StatusCode.ToString();
+                    }
                 }
             }
         }

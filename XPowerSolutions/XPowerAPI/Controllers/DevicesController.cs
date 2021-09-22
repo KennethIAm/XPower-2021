@@ -218,7 +218,7 @@ namespace XPowerAPI.Controllers
                 if (assignDeviceRequest is null)
                     return BadRequest("Invalid Data Given.");
 
-                if (assignDeviceRequest.UserId <= 0 || string.IsNullOrEmpty(assignDeviceRequest.UniqueDeviceIdentifier))
+                if (assignDeviceRequest.UserTokenRequest != "" || string.IsNullOrEmpty(assignDeviceRequest.UniqueDeviceIdentifier))
                     return NotFound("Data couldn't be found.");
 
                 IDevice assignedDevice = await _deviceService.AssignDeviceToUserAsync(assignDeviceRequest);

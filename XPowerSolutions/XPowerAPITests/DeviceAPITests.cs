@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using XPowerClassLibrary.Device.Entities;
 using XPowerClassLibrary.Device.Enums;
 using XPowerClassLibrary.Device.Models;
 
@@ -10,37 +11,42 @@ namespace XPowerAPITests
 {
     class DeviceAPITests
     {
+
         // API
-        private string apiURL = "https://localhost:44391/";
+        private string apiURL = "https://8860-93-176-82-58.ngrok.io/";
 
         // Endpoints
-        private string createDeviceEndpoint = "device/CreateDevice";
+        private string createDeviceEndpoint = "devices/assign-to-me";
 
         [Test]
-        public void CreateDeviceAPI_ValidInput_ShouldReturn200()
+        public void AssignDeviceAPI_ValidInput_ShouldReturn200()
         {
             // Arrange
             #region Arrange
-            var request = new CreateDeviceRequest(1, new DeviceFunctionalStatus(), new DeviceConnectionState(), "JohnnysLampe", "Temp");
+            var request = new AssignDeviceToUserRequest();
+            request.UniqueDeviceIdentifier = "0001";
+            request.DeviceTypeId = 2;
+            request.DeviceName = "BenjiLampe";
+            request.UserTokenRequest = "";
             IDevice returnDevice = null;
             #endregion
 
             // Act
-            returnDevice = CreateDevice(request).Result;
+            returnDevice = AssignDevice(request).Result;
 
             // Assert
             Assert.IsNotNull(returnDevice);
         }
 
         // Helper methods
-        private async System.Threading.Tasks.Task<IDevice> CreateDevice(CreateDeviceRequest request)
+        private async System.Threading.Tasks.Task<HardwareDevice> AssignDevice(AssignDeviceToUserRequest request)
         {
             using (var client = new HttpClient())
             {
-                var response = await client.PostAsJsonAsync(apiURL + createDeviceEndpoint, request);
+                var response = await client.PutAsJsonAsync(apiURL + createDeviceEndpoint, request);
                 if (response.StatusCode != System.Net.HttpStatusCode.BadRequest)
                 {
-                    return response.Content.ReadAsAsync<IDevice>().Result;
+                    return response.Content.ReadAsAsync<HardwareDevice>().Result;
                 }
                 else
                 {

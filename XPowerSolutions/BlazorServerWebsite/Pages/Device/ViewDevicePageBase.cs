@@ -72,7 +72,7 @@ namespace BlazorServerWebsite.Pages.Device
                 FunctionalStatus = DeviceFunctionalStatus.On,
                 ConnectionState = DeviceConnectionState.Connected,
                 Name = "JohnnysLampe",
-                IpAddress = "Temp"
+                IPAddress = "Temp"
             };
 
             HardwareDevice d2 = new HardwareDevice()
@@ -82,7 +82,7 @@ namespace BlazorServerWebsite.Pages.Device
                 FunctionalStatus = DeviceFunctionalStatus.On,
                 ConnectionState = DeviceConnectionState.Connected,
                 Name = "Badeværelseslys",
-                IpAddress = "Temp"
+                IPAddress = "Temp"
             };
 
             HardwareDevice d3 = new HardwareDevice()
@@ -92,7 +92,7 @@ namespace BlazorServerWebsite.Pages.Device
                 FunctionalStatus = DeviceFunctionalStatus.On,
                 ConnectionState = DeviceConnectionState.Connected,
                 Name = "Soveværelseslampe",
-                IpAddress = "Temp"
+                IPAddress = "Temp"
             };
 
             HardwareDevice d4 = new HardwareDevice()
@@ -102,7 +102,7 @@ namespace BlazorServerWebsite.Pages.Device
                 FunctionalStatus = DeviceFunctionalStatus.Off,
                 ConnectionState = DeviceConnectionState.Connected,
                 Name = "Køkkenlys",
-                IpAddress = "Temp"
+                IPAddress = "Temp"
             };
 
             HardwareDevice d5 = new HardwareDevice()
@@ -112,7 +112,7 @@ namespace BlazorServerWebsite.Pages.Device
                 FunctionalStatus = DeviceFunctionalStatus.On,
                 ConnectionState = DeviceConnectionState.Connected,
                 Name = "Blæser",
-                IpAddress = "Temp"
+                IPAddress = "Temp"
             };
 
             UserDevices = new List<HardwareDevice> { d1, d2, d3, d4, d5 };

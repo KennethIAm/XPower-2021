@@ -7,7 +7,7 @@ using XPowerClassLibrary.Validator;
 
 namespace BlazorServerWebsite.Data.Models
 {
-    public class CreateDeviceModel
+    public class AssignDeviceModel
     {
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Indtast venligst et gyldigt ID.")]
