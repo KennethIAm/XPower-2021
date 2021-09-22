@@ -8,11 +8,11 @@ namespace XPowerClassLibrary.Device.Entities
         public int Id { get; set; }
         public string Mail { get; set; }
         public string Username { get; set; }
-        public IList<DeviceInformationView> OwnedDevices { get; set; }
+        public List<DeviceInformationView> OwnedDevices { get; set; }
 
         public UserDevice() { }
 
-        public UserDevice(int id, string mail, string username, IList<DeviceInformationView> ownedDevices)
+        public UserDevice(int id, string mail, string username, List<DeviceInformationView> ownedDevices)
         {
             Id = id;
             Mail = mail;

@@ -6,6 +6,6 @@ namespace XPowerClassLibrary.Device.Models
 {
     public interface IUserDevice : IUser
     {
-        IList<DeviceInformationView> OwnedDevices { get; }
+        List<DeviceInformationView> OwnedDevices { get; }
     }
 }
