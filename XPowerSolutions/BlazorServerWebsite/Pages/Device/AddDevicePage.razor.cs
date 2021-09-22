@@ -50,70 +50,62 @@ namespace BlazorServerWebsite.Pages.Device
             }
 
             string token = await LocalStorage.GetItemAsync<string>(Settings.RefreshTokenKey);
-            string jwtToken = await LocalStorage.GetItemAsync<string>(Settings.JwtKey);
 
 
 
             var cookieContainer = new CookieContainer();
-            using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
+            using var handler = new HttpClientHandler { CookieContainer = cookieContainer };
+            using var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) };
+
+            cookieContainer.Add(client.BaseAddress, new Cookie(Settings.RefreshTokenKey, token));
+            var result = await client.PostAsJsonAsync<string>(Settings.Endpoints.RefreshTokenEndpoint, token);
+            AuthenticateResponse authenticateResponseRefresh = result.Content.ReadAsAsync<AuthenticateResponse>().Result;
+            await LocalStorage.SetItemAsync<string>(Settings.RefreshTokenKey, authenticateResponseRefresh.RefreshToken);
+            await LocalStorage.SetItemAsync<string>(Settings.JwtKey, authenticateResponseRefresh.JwtToken);
+
+            Console.WriteLine($"Server Response Code from Auth: {result.StatusCode}");
+
+            token = authenticateResponseRefresh.RefreshToken;
+            string jwtToken = authenticateResponseRefresh.JwtToken;
+
+
+            var assignDeviceRequest = new AssignDeviceToUserRequest
             {
-                using (var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) })
-                {
-                    client.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue("Bearer", jwtToken);
-                    cookieContainer.Add(new Uri(Settings.Endpoints.BaseEndpoint), new Cookie("refreshToken", token));
-
-                    var response = await client.PostAsJsonAsync(Settings.Endpoints.RefreshTokenEndpoint, token);
-
-
-                    AuthenticateResponse authenticateResponseRefresh = response.Content.ReadAsAsync<AuthenticateResponse>().Result;
-                    token = authenticateResponseRefresh.RefreshToken;
-                    await LocalStorage.SetItemAsync<string>(Settings.RefreshTokenKey, token);
-                }
-            }
-
-
-
+                UniqueDeviceIdentifier = "0003",
+                DeviceTypeId = 2,
+                DeviceName = "TestName",
+                UserTokenRequest = token
+            };
 
             cookieContainer = new CookieContainer();
-            using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
+
+            using (client)
             {
-                using (var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) })
+                var endpoint = $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.AssignDeviceEndpoint}";
+                client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", jwtToken);
+                cookieContainer.Add(new Uri(Settings.Endpoints.BaseEndpoint), new Cookie("refreshToken", token));
+
+                var createDeviceResponseMessage = await client.PutAsJsonAsync(endpoint, assignDeviceRequest);
+
+
+                if (createDeviceResponseMessage.IsSuccessStatusCode)
                 {
-                    var endpoint = $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.AssignDeviceEndpoint}";
-                    var assignDeviceRequest = new AssignDeviceToUserRequest
-                    {
-                        UniqueDeviceIdentifier = _model.Id,
-                        DeviceTypeId = Convert.ToInt32(_model.Type),
-                        DeviceName = _model.Name,
-                        UserTokenRequest = token
-                    };
-                    
-                    client.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue("Bearer", jwtToken);
-                    cookieContainer.Add(new Uri(Settings.Endpoints.BaseEndpoint), new Cookie("refreshToken", token));
+                    HardwareDevice device = await createDeviceResponseMessage.Content.ReadAsAsync<HardwareDevice>();
+                    Console.WriteLine("Device was created!");
 
-                    var createDeviceResponseMessage = await client.PutAsJsonAsync(endpoint, assignDeviceRequest);
+                    Console.WriteLine($"Created Device: {assignDeviceRequest.DeviceName} : {assignDeviceRequest.DeviceTypeId}");
 
-                    if (createDeviceResponseMessage.IsSuccessStatusCode)
-                    {
-                        Console.WriteLine("Device was created!");
+                    _message = "Enheden er blevet registreret.";
 
-                        var deviceCreated = await createDeviceResponseMessage.Content.ReadFromJsonAsync<HardwareDevice>();
-
-                        Console.WriteLine($"Created Device: {assignDeviceRequest.DeviceName} : {assignDeviceRequest.DeviceTypeId}");
-
-                        _message = "Enheden er blevet registreret.";
-
-                        System.Threading.Thread.Sleep(3000);
-                        GoToIndex();
-                    }
-                    else
-                    {
-                        _message = createDeviceResponseMessage.StatusCode.ToString();
-                    }
+                    GoToIndex();
+                }
+                else
+                {
+                    _message = createDeviceResponseMessage.ToString();
                 }
             }
+
         }
 
         protected void GoToIndex()
