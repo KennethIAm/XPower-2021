@@ -1,6 +1,7 @@
 ﻿using System.Data.SqlClient;
 using XPowerClassLibrary.Device.Repository;
 using XPowerClassLibrary.Device.Services;
+using XPowerClassLibrary.Users;
 
 namespace XPowerClassLibrary.Device
 {
@@ -68,7 +69,7 @@ namespace XPowerClassLibrary.Device
 
         public static IDeviceService GetDeviceServiceDB()
         {
-            return new DeviceService(new DbDeviceRepository());
+            return new DeviceService(new DbDeviceRepository(), UserServiceFactory.GetUserServiceDB());
         }
     }
 }
