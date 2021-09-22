@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Device.Entities;
@@ -40,7 +38,31 @@ namespace XPowerClassLibrary.Device.Services
 
         public async Task<IDevice> DeviceOnlineAsync(DeviceOnlineRequest onlineRequest)
         {
-            return await _repository.DeviceOnlineAsync(onlineRequest);
+            IDevice device = await _repository.FindDeviceByUniqueIdentifier(onlineRequest.UniqueDeviceIdentifier);
+
+            if (device is null)
+            {
+                return await _repository.CreateDeviceAsync(new CreateDeviceRequest
+                {
+                    DeviceName = "",
+                    DeviceIpAddress = onlineRequest.IPAddress,
+                    DeviceFunctionalStatus = DeviceFunctionalStatus.Disabled,
+                    DeviceConnectionState = DeviceConnectionState.Connected,
+                    UniqueDeviceIdentifier = onlineRequest.UniqueDeviceIdentifier,
+                    DeviceTypeId = onlineRequest.DeviceTypeId
+                });
+            }
+
+            return await _repository.UpdateDeviceAsync(new UpdateDeviceRequest
+            {
+                DeviceId = device.Id,
+                DeviceTypeId = device.DeviceType.Id,
+                DeviceName = device.Name,
+                DeviceFunctionalStatus = device.FunctionalStatus,
+                DeviceConnectionState = device.ConnectionState,
+                UniqueDeviceIdentifier = onlineRequest.UniqueDeviceIdentifier,
+                DeviceIpAddress = onlineRequest.IPAddress
+            });
         }
 
         public async Task<IDevice> GetDeviceByIdAsync(int id)

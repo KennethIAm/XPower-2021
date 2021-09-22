@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using XPowerClassLibrary.Device.Enums;
 using XPowerClassLibrary.Device.Models;
-using XPowerClassLibrary.Device.Models.Requests;
 
 namespace XPowerClassLibrary.Device.Repository
 {
@@ -12,7 +10,7 @@ namespace XPowerClassLibrary.Device.Repository
         Task<IDevice> UpdateDeviceAsync(UpdateDeviceRequest updateRequest);
         Task<IDevice> GetDeviceByIdAsync(int id);
         Task<bool> DeleteDeviceByIdAsync(int id);
-        Task<IDevice> DeviceOnlineAsync(DeviceOnlineRequest onlineRequest);
+        Task<IDevice> FindDeviceByUniqueIdentifier(string uniqueIdentifier);
         Task<IDevice> AssignDeviceToUserAsync(AssignDeviceToUserRequest assignDeviceRequest);
         Task<IEnumerable<IDevice>> GetUsersOwnedDevices(int userId);
     }

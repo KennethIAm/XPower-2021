@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using XPowerClassLibrary.Device.Enums;
 using XPowerClassLibrary.Device.Models;
 using XPowerClassLibrary.Device.Models.Requests;
 

@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using XPowerClassLibrary.Device.Enums;
 using XPowerClassLibrary.Device.Models;
 using XPowerClassLibrary.Device.Entities;
-using XPowerClassLibrary.Device.Models.Requests;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace XPowerClassLibrary.Device.Repository
@@ -39,7 +37,7 @@ namespace XPowerClassLibrary.Device.Repository
                 assignedDeviceId = await conn.ExecuteScalarAsync<int>(proc, values, commandType: CommandType.StoredProcedure);
             }
 
-            if (assignedDeviceId > 0)
+            if (GreaterThanZero(assignedDeviceId))
             {
                 device = await GetDeviceByIdAsync(assignedDeviceId);
 
@@ -48,6 +46,8 @@ namespace XPowerClassLibrary.Device.Repository
 
             return device;
         }
+
+        
 
         public async Task<IDevice> CreateDeviceAsync(CreateDeviceRequest request)
         {
@@ -74,7 +74,7 @@ namespace XPowerClassLibrary.Device.Repository
             }
 
 
-            if (entityId != 0)
+            if (GreaterThanZero(entityId))
             {
                 using (var conn = DeviceServiceFactory.GetSqlConnectionBasicReader())
                 {
@@ -107,7 +107,7 @@ namespace XPowerClassLibrary.Device.Repository
             return deviceDeletedSuccessfully;
         }
 
-        public async Task<IDevice> DeviceOnlineAsync(DeviceOnlineRequest onlineRequest)
+        public async Task<IDevice> FindDeviceByUniqueIdentifier(string uniqueIdentifier)
         {
             IDevice device = null;
 
@@ -116,36 +116,12 @@ namespace XPowerClassLibrary.Device.Repository
                 await conn.OpenAsync();
 
                 var procedure = "[SPFindDeviceByUniqueDeviceIdentifier]";
-                var values = new { @UniqueDeviceIdentifier = onlineRequest.UniqueDeviceIdentifier };
+                var values = new { @UniqueDeviceIdentifier = uniqueIdentifier };
 
                 device = await conn.QuerySingleOrDefaultAsync<DeviceInformationView>(procedure, values, commandType: CommandType.StoredProcedure);
             }
 
-            // Create Device if still null.
-            if (device is null)
-            {
-                return await CreateDeviceAsync(new CreateDeviceRequest()
-                {                    
-                    DeviceName = "",
-                    DeviceIpAddress = onlineRequest.IPAddress,
-                    DeviceFunctionalStatus = DeviceFunctionalStatus.Disabled,
-                    DeviceConnectionState = DeviceConnectionState.Connected,
-                    UniqueDeviceIdentifier = onlineRequest.UniqueDeviceIdentifier,
-                    DeviceTypeId = onlineRequest.DeviceTypeId
-                });
-            }
-
-            // Update device if found.
-            return await UpdateDeviceAsync(new UpdateDeviceRequest()
-            {
-                DeviceId = device.Id,
-                DeviceName = device.Name,
-                DeviceIpAddress = onlineRequest.IPAddress,
-                DeviceFunctionalStatus = device.FunctionalStatus,
-                DeviceConnectionState = device.ConnectionState,
-                UniqueDeviceIdentifier = onlineRequest.UniqueDeviceIdentifier,
-                DeviceTypeId = device.DeviceType.Id
-            });
+            return device;
         }
 
         public async Task<IDevice> GetDeviceByIdAsync(int id)
@@ -232,6 +208,11 @@ namespace XPowerClassLibrary.Device.Repository
             }
 
             return isDeviceAssigned;
+        }
+
+        private static bool GreaterThanZero(int assignedDeviceId)
+        {
+            return assignedDeviceId > 0;
         }
     }
 }

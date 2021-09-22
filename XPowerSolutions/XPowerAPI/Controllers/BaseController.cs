@@ -67,5 +67,9 @@ namespace XPowerAPI.Controllers
             return userIsLoggedin;
         }
 
+        public object GenerateExceptionMessage(string msg)
+        {
+            return new { message = msg };
+        }
     }
 }
