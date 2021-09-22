@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Device.Entities;
@@ -84,7 +85,7 @@ namespace XPowerClassLibrary.Device.Services
                 Id = user.Id,
                 Mail = user.Mail,
                 Username = user.Username,
-                OwnedDevices = devices.ToList()
+                OwnedDevices = devices as List<DeviceInformationView>
             };
 
             return await Task.FromResult(userDevices);
