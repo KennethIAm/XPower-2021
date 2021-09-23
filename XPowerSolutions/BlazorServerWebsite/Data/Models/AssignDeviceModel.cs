@@ -19,12 +19,6 @@ namespace BlazorServerWebsite.Data.Models
         [MaxLength(25, ErrorMessage = "Enhedens navn opfylder ikke vores navngivningskrav. Må maksimalt være 25 karakterer langt.")]
         public string Name { get; set; }
 
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Indtast venligst enhedens navn.")]
-        [MinLength(1, ErrorMessage = "Enhedens type opfylder ikke vores navngivningskrav. Skal være minimum 1 karakter langt.")]
-        [MaxLength(25, ErrorMessage = "Enhedens type opfylder ikke vores navngivningskrav. Må maksimalt være 25 karakterer langt.")]
-        [Range(0, int.MaxValue, ErrorMessage = "Et ID kan kun indeholde heltal.")]
-        public string Type { get; set; }
-
         public bool IsIDValid()
         {
             try
@@ -51,22 +45,9 @@ namespace BlazorServerWebsite.Data.Models
             }
         }
 
-        public bool IsTypeValid()
-        {
-            try
-            {
-                DefaultValidators.ValidateDeviceTypeException(Name);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
         public bool IsValidForm()
         {
-            return IsIDValid() && IsNameValid() && IsTypeValid();
+            return IsIDValid() && IsNameValid();
         }
     }
 }

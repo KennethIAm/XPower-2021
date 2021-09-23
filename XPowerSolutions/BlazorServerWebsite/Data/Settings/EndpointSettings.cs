@@ -15,6 +15,7 @@ namespace BlazorServerWebsite.Data.Settings
         public string AssignDeviceEndpoint { get; set; }
         public string GetDeviceByIdEndpoint { get; set; }
         public string AllUserDevicesEndpoint { get; set; }
-        public string ChangeDeviceStatusEndpoint { get; set; }
+        public string DeviceEndpoint { get; set; }
+        public string UpdateDeviceEndpoint { get; set; }
     }
 }

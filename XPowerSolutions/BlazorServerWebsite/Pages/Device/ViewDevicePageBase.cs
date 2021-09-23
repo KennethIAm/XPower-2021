@@ -11,6 +11,11 @@ using Newtonsoft.Json;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Device.Entities;
 using XPowerClassLibrary.Device.Enums;
+using Blazored.LocalStorage;
+using System.Net;
+using XPowerClassLibrary.Users.Models;
+using System.Net.Http.Headers;
+using XPowerClassLibrary.Device.Models;
 
 namespace BlazorServerWebsite.Pages.Device
 {
@@ -18,6 +23,7 @@ namespace BlazorServerWebsite.Pages.Device
     {
         [Inject] protected NavigationManager NavigationManager { get; set; }
         [Inject] protected IHttpClientFactory ClientFactory { get; set; }
+        [Inject] protected ILocalStorageService LocalStorage { get; set; }
         [Inject] protected ISettings Settings { get; set; }
 
         [CascadingParameter] protected Task<AuthenticationState> AuthenticationState { get; set; }
@@ -27,10 +33,13 @@ namespace BlazorServerWebsite.Pages.Device
         public HardwareDevice userDevice;
 
         [Parameter] public int Id { get; set; }
+        protected string RefreshToken { get; set; }
+        protected string JwtToken { get; set; }
+        protected string _message { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
-            await LoadDummyDevice();
+            await LoadDevice();
             _context = await AuthenticationState;
         }
 
@@ -47,95 +56,160 @@ namespace BlazorServerWebsite.Pages.Device
             }
         }
 
-        // Actual data
-        protected async Task ChangeDeviceStatus()
+        private async Task LoadDevice()
         {
-            using (var client = GetHttpClient(Settings.Endpoints.BaseEndpoint))
+            await RefreshTokensAsync();
+
+            var cookieContainer = new CookieContainer();
+
+            using (var handler = new HttpClientHandler { CookieContainer = cookieContainer })
             {
-                var endpoint = $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.ChangeDeviceStatusEndpoint}";
-                var requestMessage = GetHttpRequest(HttpMethod.Post, endpoint);
-
-                var response = client.PostAsJsonAsync(endpoint, Id).Result;
-                userDevice = JsonConvert.DeserializeObject<HardwareDevice>(response.Content.ToString());
-            }
-        }
-        
-        // Dummy data
-        private async Task LoadDummyDevice()
-        {
-            IEnumerable<HardwareDevice> UserDevices;
-
-            HardwareDevice d1 = new HardwareDevice()
-            {
-                Id = 1,
-                DeviceType = new DeviceType(1, "Lyselement"),
-                FunctionalStatus = DeviceFunctionalStatus.On,
-                ConnectionState = DeviceConnectionState.Connected,
-                Name = "JohnnysLampe",
-                IPAddress = "Temp"
-            };
-
-            HardwareDevice d2 = new HardwareDevice()
-            {
-                Id = 2,
-                DeviceType = new DeviceType(1, "Lyselement"),
-                FunctionalStatus = DeviceFunctionalStatus.On,
-                ConnectionState = DeviceConnectionState.Connected,
-                Name = "Badeværelseslys",
-                IPAddress = "Temp"
-            };
-
-            HardwareDevice d3 = new HardwareDevice()
-            {
-                Id = 3,
-                DeviceType = new DeviceType(1, "Lyselement"),
-                FunctionalStatus = DeviceFunctionalStatus.On,
-                ConnectionState = DeviceConnectionState.Connected,
-                Name = "Soveværelseslampe",
-                IPAddress = "Temp"
-            };
-
-            HardwareDevice d4 = new HardwareDevice()
-            {
-                Id = 4,
-                DeviceType = new DeviceType(1, "Lyselement"),
-                FunctionalStatus = DeviceFunctionalStatus.Off,
-                ConnectionState = DeviceConnectionState.Connected,
-                Name = "Køkkenlys",
-                IPAddress = "Temp"
-            };
-
-            HardwareDevice d5 = new HardwareDevice()
-            {
-                Id = 5,
-                DeviceType = new DeviceType(4, "Klimaelement"),
-                FunctionalStatus = DeviceFunctionalStatus.On,
-                ConnectionState = DeviceConnectionState.Connected,
-                Name = "Blæser",
-                IPAddress = "Temp"
-            };
-
-            UserDevices = new List<HardwareDevice> { d1, d2, d3, d4, d5 };
-
-            foreach (HardwareDevice d in UserDevices)
-            {
-                if (d.Id == Id)
+                using (var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) })
                 {
-                    userDevice = d;
+                    var endpoint = $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.GetDeviceByIdEndpoint}" + Id;
+                    client.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", JwtToken);
+                    cookieContainer.Add(new Uri(Settings.Endpoints.BaseEndpoint), new Cookie("refreshToken", RefreshToken));
+
+                    var createDeviceResponseMessage = await client.GetAsync(endpoint);
+
+
+                    if (createDeviceResponseMessage.IsSuccessStatusCode)
+                    {
+                        string jsonString = await createDeviceResponseMessage.Content.ReadAsStringAsync();
+                        userDevice = JsonConvert.DeserializeObject<HardwareDevice>(jsonString);
+
+                        Console.WriteLine("Device retrieved!");
+                    }
                 }
             }
         }
 
-        // Actual data
-        private async Task LoadDevice()
+        protected async Task ChangeFunctionalStatus()
         {
-            using (var client = GetHttpClient(Settings.Endpoints.BaseEndpoint))
+            string command = "";
+            if (userDevice.FunctionalStatus == DeviceFunctionalStatus.On)
             {
-                var endpoint = $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.GetDeviceByIdEndpoint}";
-                var requestMessage = GetHttpRequest(HttpMethod.Post, endpoint);
+                command = "function1";
+            }
+            else if (userDevice.FunctionalStatus == DeviceFunctionalStatus.Off)
+            {
+                command = "function2";
+            }
 
-                var response = client.PostAsJsonAsync(endpoint, Id).Result;
-                userDevice = JsonConvert.DeserializeObject<HardwareDevice>(response.Content.ToString());
+            if (command != "")
+            {
+                bool changeSuccessful = false;
+                await RefreshTokensAsync();
+
+                var cookieContainer = new CookieContainer();
+
+                using (var handler = new HttpClientHandler { CookieContainer = cookieContainer })
+                {
+                    using (var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) })
+                    {
+                        var endpoint = $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.DeviceEndpoint}?command=" + command + "&ipAddress=" + userDevice.IPAddress;
+                        client.DefaultRequestHeaders.Authorization =
+                            new AuthenticationHeaderValue("Bearer", JwtToken);
+                        cookieContainer.Add(new Uri(Settings.Endpoints.BaseEndpoint), new Cookie("refreshToken", RefreshToken));
+
+                        var createDeviceResponseMessage = await client.GetAsync(endpoint);
+
+
+                        if (createDeviceResponseMessage.IsSuccessStatusCode)
+                        {
+                            string jsonString = await createDeviceResponseMessage.Content.ReadAsStringAsync();
+                            userDevice = JsonConvert.DeserializeObject<HardwareDevice>(jsonString);
+
+                            if (command == "function1")
+                            {
+                                userDevice.FunctionalStatus = DeviceFunctionalStatus.On;
+                            }
+                            else if (command == "function2")
+                            {
+                                userDevice.FunctionalStatus = DeviceFunctionalStatus.Off;
+                            }
+
+                            Console.WriteLine("Device retrieved!");
+
+                            changeSuccessful = true;
+                        }
+                        else
+                        {
+                            _message = "Kunne ikke oprette forbindelse til enheden.";
+                        }
+                    }
+                }
+
+                if (changeSuccessful)
+                {
+                    await UpdateDevice();
+                }
+            }
+        }
+
+        private async Task UpdateDevice()
+        {
+            await RefreshTokensAsync();
+
+            UpdateDeviceRequest request = new UpdateDeviceRequest
+            {
+                DeviceId = userDevice.Id,
+                DeviceName = userDevice.Name,
+                DeviceIpAddress = userDevice.IPAddress,
+                DeviceConnectionState = userDevice.ConnectionState,
+                DeviceFunctionalStatus = userDevice.FunctionalStatus,
+                DeviceTypeId = userDevice.DeviceType.Id,
+                UniqueDeviceIdentifier = userDevice.UniqueDeviceIdentifier
+            };
+
+            CookieContainer cookieContainer = new CookieContainer();
+            using (var handler = new HttpClientHandler { CookieContainer = cookieContainer })
+            {
+                using (var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) })
+                {
+                    var endpoint = $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.AllUserDevicesEndpoint}";
+                    client.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", JwtToken);
+                    cookieContainer.Add(new Uri(Settings.Endpoints.BaseEndpoint), new Cookie("refreshToken", RefreshToken));
+
+                    var createDeviceResponseMessage = await client.PutAsJsonAsync(endpoint, request);
+
+                    if (createDeviceResponseMessage.IsSuccessStatusCode)
+                    {
+                        _message = "Enheden er blevet opdateret.";
+
+                        Console.WriteLine("Devices updated!");
+                    }
+                    else
+                    {
+                        _message = "Enheden er ikke blevet opdateret.";
+                    }
+                }
+            }
+        }
+
+        private async Task RefreshTokensAsync()
+        {
+            string token = await LocalStorage.GetItemAsync<string>(Settings.RefreshTokenKey);
+
+            var cookieContainer = new CookieContainer();
+
+            using (var handler = new HttpClientHandler { CookieContainer = cookieContainer })
+            {
+                using (var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) })
+                {
+                    cookieContainer.Add(client.BaseAddress, new Cookie(Settings.RefreshTokenKey, token));
+                    var result = await client.PostAsJsonAsync<string>(Settings.Endpoints.RefreshTokenEndpoint, token);
+                    AuthenticateResponse authenticateResponseRefresh = result.Content.ReadAsAsync<AuthenticateResponse>().Result;
+                    await LocalStorage.SetItemAsync<string>(Settings.RefreshTokenKey, authenticateResponseRefresh.RefreshToken);
+                    await LocalStorage.SetItemAsync<string>(Settings.JwtKey, authenticateResponseRefresh.JwtToken);
+
+                    Console.WriteLine($"Server Response Code from Auth: {result.StatusCode}");
+
+                    RefreshToken = authenticateResponseRefresh.RefreshToken;
+                    JwtToken = authenticateResponseRefresh.JwtToken;
+                }
             }
         }
 

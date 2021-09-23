@@ -30,17 +30,51 @@
         <h4 class="text-dark text-center text-light">Test tekst, det her er bare for at teste. En test er en test er en test. En, to, tre, test den tekst. Teksttest. Bare tekst. Man kan ikke gå galt med tekst</h4>
 
 
-        <table class="table text-light">
-            <thead>
-                <tr>
-                    <th scope="col">Enhed</th>
-                    <th scope="col" width="100px">Status</th>
-                </tr>
-            </thead>
-            <tbody>
+        @if (UserDevices is not null)
+        {
+            <table class="table text-light">
+                <thead>
+                    <tr>
+                        <th scope="col">Enhed</th>
+                        <th scope="col" width="100px">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var device in UserDevices.OwnedDevices)
+                    {
+                    <tr>
+                        <td ><a href="device/viewdevice/@device.Id" style="color:white;">@device.Name</a></td>
+                        @if (@device.FunctionalStatus == 3)
+                        {
+                            <td style="color:lime;">Tændt</td>
+                        }
+                        else if (@device.FunctionalStatus == 2)
+                        {
+                            <td style="color:red;">Slukket</td>
+                        }
+                        else if (@device.FunctionalStatus == 1)
+                        {
+                            <td style="color:red;">Deaktiveret</td>
+                        }
+                        else if (@device.FunctionalStatus == 0)
+                        {
+                            <td style="color:red;">Udefineret</td>
+                        }
+                        else
+                        {
+                            <td>Ukendt</td>
+                        }
 
-            </tbody>
-        </table>
+
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <h4 class="text-center text-light">Indlæser enheder...</h4>
+        }
         <button class="btn btn-outline-success btn-sm" @onclick="GoToCreateDevice" style="width: 100%;">Tilføj Enhed</button>
     </div>
     <br />
