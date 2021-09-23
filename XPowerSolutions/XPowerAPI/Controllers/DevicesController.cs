@@ -208,7 +208,7 @@ namespace XPowerAPI.Controllers
                     return BadRequest(GenerateExceptionMessage("Invalid Device Update Request."));
                 }
 
-                if (UsingValidIpAddress(updateRequest.DeviceIpAddress))
+                if (!UsingValidIpAddress(updateRequest.DeviceIpAddress))
                 {
                     return BadRequest(GenerateExceptionMessage("Invalid Device Update Request, IPAddress not readable."));
                 }

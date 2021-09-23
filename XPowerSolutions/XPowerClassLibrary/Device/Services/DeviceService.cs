@@ -47,7 +47,7 @@ namespace XPowerClassLibrary.Device.Services
                 {
                     DeviceName = "",
                     DeviceIpAddress = onlineRequest.IPAddress,
-                    DeviceFunctionalStatus = DeviceFunctionalStatus.Disabled,
+                    DeviceFunctionalStatus = DeviceFunctionalStatus.Off,
                     DeviceConnectionState = DeviceConnectionState.Connected,
                     UniqueDeviceIdentifier = onlineRequest.UniqueDeviceIdentifier,
                     DeviceTypeId = onlineRequest.DeviceTypeId

@@ -5,7 +5,7 @@ using XPowerClassLibrary.Users;
 
 namespace XPowerClassLibrary.Device
 {
-    public class DeviceServiceFactory
+    public static class DeviceServiceFactory
     {
         /// <summary>
         /// SqlConnection with permission to create new device via SPCreateNewDevice
