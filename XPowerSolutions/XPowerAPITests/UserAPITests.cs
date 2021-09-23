@@ -18,7 +18,7 @@ namespace XPowerAPITests
     public class UserAPITests
     {
         // API
-        private string apiURL = "https://f051-93-176-82-58.ngrok.io/";
+        private string apiURL = "https://xpower.eu.ngrok.io/";
 
         // Endpoints
         private string createUserEndpoint = "user/CreateUser";
@@ -285,7 +285,7 @@ namespace XPowerAPITests
             }
         }
 
-        private AuthenticateResponse Login(AuthenticateRequest request)
+        public AuthenticateResponse Login(AuthenticateRequest request)
         {
             using (var client = new HttpClient())
             {

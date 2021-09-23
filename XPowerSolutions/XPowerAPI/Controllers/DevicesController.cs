@@ -1,17 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Device.Models;
 using XPowerClassLibrary.Device.Models.Requests;
 using XPowerClassLibrary.Device.Services;
-using XPowerClassLibrary.Validator;
 
 namespace XPowerAPI.Controllers
 {
@@ -178,9 +175,13 @@ namespace XPowerAPI.Controllers
                 var uri = new Uri($"http://{ipAddress}");
                 var response = await _clientFactory.CreateClient().GetAsync($"{uri}?{command}", HttpCompletionOption.ResponseHeadersRead);
 
-                if (response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode) 
                 {
-                    return Ok();
+                    var data = await response.Content.ReadAsStringAsync();
+
+                    var powerData = JsonSerializer.Deserialize<PowerUsageModel>(data);
+
+                    return Ok(powerData);
                 }
 
                 return NotFound(GenerateExceptionMessage("Command not found."));
