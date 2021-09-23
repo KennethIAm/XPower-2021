@@ -30,8 +30,7 @@ namespace XPowerClassLibrary.Device.Repository
                 {
                     @UserTokenRequest = assignDeviceRequest.UserTokenRequest,
                     @UniqueDeviceIdentifier = assignDeviceRequest.UniqueDeviceIdentifier,
-                    @DeviceName = assignDeviceRequest.DeviceName,
-                    @DeviceTypeId = assignDeviceRequest.DeviceTypeId
+                    @DeviceName = assignDeviceRequest.DeviceName
                 };
 
                 assignedDeviceId = await conn.ExecuteScalarAsync<int>(proc, values, commandType: CommandType.StoredProcedure);
