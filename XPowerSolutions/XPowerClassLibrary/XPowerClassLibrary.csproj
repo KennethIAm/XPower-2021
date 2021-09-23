@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <Folder Include="Dokumentation\" />
-    <Folder Include="Arduino\" />
   </ItemGroup>
 
 </Project>

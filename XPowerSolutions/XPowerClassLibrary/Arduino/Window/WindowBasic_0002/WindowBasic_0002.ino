@@ -1,20 +1,24 @@
 #include <SPI.h>        //Libraries required to communicate with the arduino ethernet shield
 #include <WiFi101.h>
 #include <ArduinoHttpClient.h>
+#include <Servo.h>  
 #include "arduino_secrets.h"
 
 String UNIT_ID = SECRET_DEVICE_ID;
-String DEVICE_TYPE_ID = "2";
+String DEVICE_TYPE_ID = "3";
 char serverAddress[] = SECRET_API_ROOT;  // server address
 int port = 80;
 int ERROR_PIN = 10;
 char ssid[] = SECRET_WIFI_SSID;
 char pass[] = SECRET_WIFI_PASS;
 
+bool debugMode = false;
 
-// Voltage meassure properties 
-#define VT_PIN A0
-#define AT_PIN A1
+// Servo functionality specific to window
+Servo myservo;  // create servo object to control a servo
+int OPEN_WINDOW_VALUE = 180;
+int CLOSED_WINDOW_VALUE = 90;
+int CURRENT_WINDOW_POS;
 
 // Wifi properties
 WiFiClient wifi_client;
@@ -22,7 +26,7 @@ String DEVICE_IP;
 
 // Websocket functions.
 WiFiServer server(80);  //Server port    
-
+WiFiClient client;
 
 // API functionality
 HttpClient httpClient = HttpClient(wifi_client, serverAddress, port); 
@@ -32,10 +36,14 @@ String deviceOnlineEndpoint = "/devices/IAmOnline";
 
 void setup() {
  // Open serial monitor and wait for port to open
-  Serial.begin(9600);
-   while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo only
+  if(debugMode){
+     Serial.begin(9600);
+     while (!Serial) {
+      ; // wait for serial port to connect. Needed for Leonardo only
+    }
   }
+ 
+
 
   // Run device specific setup
   device_setup();
@@ -58,20 +66,62 @@ void loop() {
 }
 
 void device_setup(){
-  pinMode(13, OUTPUT);
-  pinMode(ERROR_PIN, OUTPUT);
+  myservo.attach(10);  // attaches the servo on pin 9 to the servo object
+  myservo.write(CLOSED_WINDOW_VALUE);
 }
 
 void run_function_0(){
-  Serial.println(ShowKwh());
+  client.println("HTTP/1.1 200 OK");
+  client.println("Content-Type: application/json;charset=utf-8");
+  client.println("Server: Arduino");
+  client.println("Connection: close");
+  client.println();
+  client.println("{\"HasReturnInfo\": true,\"CurrentUsage\":0 }");
+  client.println();
 }
 
 void run_function_1(){
-  digitalWrite(13, HIGH);
+
+  client.println("HTTP/1.1 200 OK");
+  client.println("Content-Type: application/json;charset=utf-8");
+  client.println("Server: Arduino");
+  client.println("Connection: close");
+  client.println();
+  client.println("{\"HasReturnInfo\": false,\"CurrentUsage\":0}");
+  client.println();
+
+  CURRENT_WINDOW_POS = CLOSED_WINDOW_VALUE;
+  
+  while (CURRENT_WINDOW_POS <= OPEN_WINDOW_VALUE){
+    myservo.write(CURRENT_WINDOW_POS);
+    CURRENT_WINDOW_POS = CURRENT_WINDOW_POS + 1;
+    delay(15);
+  }
+
+
+  
 }
 
 void run_function_2(){
-  digitalWrite(13, LOW);
+
+  client.println("HTTP/1.1 200 OK");
+  client.println("Content-Type: application/json;charset=utf-8");
+  client.println("Server: Arduino");
+  client.println("Connection: close");
+  client.println();
+  client.println("{\"HasReturnInfo\": false,\"CurrentUsage\":0}");
+  client.println();
+  
+  CURRENT_WINDOW_POS = OPEN_WINDOW_VALUE;
+  
+  while (CURRENT_WINDOW_POS >= CLOSED_WINDOW_VALUE){
+    myservo.write(CURRENT_WINDOW_POS);
+    CURRENT_WINDOW_POS = CURRENT_WINDOW_POS - 1;
+    delay(15);
+  }
+
+
+
 }
 
 
@@ -159,10 +209,11 @@ void call_startup_api(){
 }
 
 
+
 // Websocket functionality
 void run_websocket(){
   // Check for client request
-  WiFiClient client = server.available();
+  client = server.available();
   
   if (client) {                    //If client request arrived read the request
     while (client.connected()) {   
@@ -182,38 +233,14 @@ void run_websocket(){
            if (readString.indexOf("?function0") >0){
                 Serial.println("Function 1 has been called.");
                 run_function_0();
-
-                String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nFUNCTION0 RUN";
-                s += "</html>\n";
-                
-                client.print(s);
            }
-           
-           //Translate the user request and check to switch on or off the fan
-           if (readString.indexOf("?function1") >0){
+           else if (readString.indexOf("?function1") >0){
                 Serial.println("Function 1 has been called.");
                 run_function_1();
-
-                String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nFUNCTION1 RUN";
-                s += "</html>\n";
-                
-                
-                client.print(s);
-               
-               //client.println("HTTP/1.1 204 OK"); 
            }
            else if (readString.indexOf("?function2") >0){
                Serial.println("Function 2 has been called.");
                run_function_2();
-               //client.println("HTTP/1.1 204 OK"); 
-
-              
-                
-                String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nFUNCTION2 RUN";
-                s += "</html>\n";
-                client.print(s);
-               
-               
            }
            else if(readString == "" || readString == "/"){
               client.println("<!DOCTYPE HTML>");
@@ -229,9 +256,10 @@ void run_websocket(){
               Serial.println("Bad Request - Unkown command called: " + readString);
               //client.println("HTTP/1.1 400 Bad Request");     
 
-              String s = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nUnkown command";
-              s += "</html>\n";
-              client.print(s);
+              client.println("HTTP/1.1 400 Bad Request");
+              client.println("Content-Type: application/json;charset=utf-8");
+              client.println("Server: Arduino");
+              client.println("Connection: close");
               
            }
 
@@ -246,24 +274,4 @@ void run_websocket(){
        }
     }
   }
-}
-
-
-float ShowKwh(){
-  int vt_read = analogRead(VT_PIN);
-  int at_read = analogRead(AT_PIN);
-
- 
-
-  float voltage = vt_read * (5.0 / 1024.0) * 5;
-  float current = at_read * (5.0 / 1024.0) * 2.0;
-  float watts = voltage * current;
-
- 
-
-  // Find calculation for Kwh
-
- 
-
-  return watts;
 }
