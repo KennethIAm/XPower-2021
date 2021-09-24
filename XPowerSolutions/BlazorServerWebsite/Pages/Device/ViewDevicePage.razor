@@ -1,0 +1,172 @@
+﻿@page "/device/viewdevice/{Id:int}"
+@inherits ViewDevicePageBase
+@attribute [Authorize]
+<div class="card bg-primary page-layout">
+    <br />
+    @if (UserDevice is not null)
+    {
+        <div style="padding-left: 20px; padding-right: 20px; max-width: 700px; align-self: center; width:100%;">
+            @if (UserDevice.DeviceType.Id == 1)
+            {
+                <span class="fas fa-question-circle text-light" style="text-align:center; font-size:100px; margin-bottom: 10px;"></span>
+            }
+            else if (UserDevice.DeviceType.Id == 2)
+            {
+                <span class="fas fa-lightbulb text-light" style="align-self: center;font-size:100px; margin-bottom: 10px;"></span>
+            }
+            else if (UserDevice.DeviceType.Id == 3)
+            {
+                <span class="fas fa-door-open text-light" style="align-self:center; font-size:100px; margin-bottom: 10px;"></span>
+            }
+            else if (UserDevice.DeviceType.Id == 4)
+            {
+                <span class="fas fa-fan text-light" style="align-self:center; font-size:100px; margin-bottom: 10px;"></span>
+            }
+            <h3 class="text-dark text-center text-light">@UserDevice.Name</h3>
+
+            @if (CurrentUsage.HasReturnInfo == true)
+            {
+                <br />
+                <div style="display: inline;">
+                    <h1 class="text-center text-light" style="font-weight: bold;">@CurrentUsage.CurrentUsage</h1>
+                    <p class="text-center text-light">KW/H</p>
+                </div>
+            }
+            <br />
+            @if (!string.IsNullOrEmpty(_message))
+            {
+                <DisplayAlertMessage Message="@_message" AlertType="AlertType.Default" ClearMessageInMilliseconds="5000" />
+            }
+
+            <EditForm Model="UserDevice" OnSubmit="ChangeFunctionalStatus">
+                <table class="table text-light">
+                    <thead>
+                        <tr>
+                            <th scope="col">Status</th>
+                            <th scope="col" width="120px"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            @if (UserDevice.FunctionalStatus == XPowerClassLibrary.Device.Enums.DeviceFunctionalStatus.Off)
+                            {
+                                <td style="color:red;">@StatusOff</td>
+                                if (OnOffDisabled == false)
+                                {
+                                    <td><button class="btn btn-outline-success btn-sm" type="submit" style="width: 120px;">@ButtonOn</button></td>
+                                }
+                                else
+                                {
+                                    <td><button class="btn btn-outline-success btn-sm" type="submit" style="width: 120px;" disabled>@ButtonOn</button></td>
+                                }
+                            }
+                            else if (UserDevice.FunctionalStatus == XPowerClassLibrary.Device.Enums.DeviceFunctionalStatus.On)
+                            {
+                                <td style="color:lime;">@StatusOn</td>
+                                if (OnOffDisabled == false)
+                                {
+                                    <td><button class="btn btn-outline-success btn-sm" type="submit" style="width: 120px;">@ButtonOff</button></td>
+                                }
+                                else
+                                {
+                                    <td><button class="btn btn-outline-success btn-sm" type="submit" style="width: 120px;" disabled>@ButtonOff</button></td>
+                                }
+                            }
+                            else if (UserDevice.FunctionalStatus == XPowerClassLibrary.Device.Enums.DeviceFunctionalStatus.Disabled)
+                            {
+                                <td style="color:red;">Deaktiveret</td>
+                                if (OnOffDisabled == false)
+                                {
+                                    <td><button class="btn btn-outline-success btn-sm" type="submit" style="width: 120px;">@ButtonOn</button></td>
+                                }
+                                else
+                                {
+                                    <td><button class="btn btn-outline-success btn-sm" type="submit" style="width: 120px;" disabled>@ButtonOn</button></td>
+                                }
+                            }
+                            else if (UserDevice.FunctionalStatus == XPowerClassLibrary.Device.Enums.DeviceFunctionalStatus.Undefined)
+                            {
+                                <td style="color:red;">Udefineret</td>
+                                <td><button class="btn btn-outline-success btn-sm" disabled style="width: 120px;">Tænd / Sluk</button></td>
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+
+                <br />
+
+                <table class="table text-light">
+                    <thead>
+                        <tr>
+                            <th scope="col">Forbindelse</th>
+                            <th scope="col" width="120px">Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            @if (UserDevice.ConnectionState == XPowerClassLibrary.Device.Enums.DeviceConnectionState.Undefined)
+                            {
+                                <td>Udefineret</td>
+                                <td>@UserDevice.DeviceType.Name</td>
+                            }
+                            else if (UserDevice.ConnectionState == XPowerClassLibrary.Device.Enums.DeviceConnectionState.Disconnected)
+                            {
+                                <td>Ikke forbundet</td>
+                                <td>@UserDevice.DeviceType.Name</td>
+                            }
+                            else if (UserDevice.ConnectionState == XPowerClassLibrary.Device.Enums.DeviceConnectionState.Connecting)
+                            {
+                                <td>Forbinder</td>
+                                <td>@UserDevice.DeviceType.Name</td>
+                            }
+                            else if (UserDevice.ConnectionState == XPowerClassLibrary.Device.Enums.DeviceConnectionState.Connected)
+                            {
+                                <td>Forbundet</td>
+                                <td>@UserDevice.DeviceType.Name</td>
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+            </EditForm>
+            <div style="text-align: center; max-width: 700px; width: 100%;">
+                <DynamicNavigationButton DisplayText="         Tilbage         " Route="/" />
+            </div>
+        </div>
+    }
+    else
+    {
+        if (WaitForData == true)
+        {
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <div style="width: 300px" class="d-flex mx-auto align-items-center">
+                <strong class="text-light" style="font-size:25px;">Indlæser enheder... </strong>
+                <div class="spinner-border text-light ml-auto" role="status" aria-hidden="true"></div>
+            </div>
+            <br />
+            <br />
+            <br />
+            <br />
+        }
+        else
+        {
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <div style="width: 300px" class="d-flex mx-auto align-items-center">
+                <strong class="text-light" style="font-size:25px;">Der opstod en fejl.</strong>
+            </div>
+            <br />
+            <br />
+            <br />
+            <br />
+        }
+    }
+    <br />
+</div>
+<br />

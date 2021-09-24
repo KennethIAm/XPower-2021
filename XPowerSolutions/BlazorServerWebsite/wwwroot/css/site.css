@@ -12,6 +12,23 @@ html, body {
     background-color: var(--clr-bg-primary-rgb) !important;
 }
 
+.page-layout {
+    background-color: var(--clr-bg-primary-rgb) !important;
+    width: 100%;
+}
+
+.container {
+    display: flex;
+}
+
+.column {
+    flex: 50%;
+}
+
+#bloc1, #bloc2 {
+    display: inline;
+}
+
 .text-light {
     color: var(--clr-light) !important;
 }

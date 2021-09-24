@@ -44,6 +44,34 @@ namespace XPowerClassLibrary.Validator
                     new MaxLengthRule(500)
                 };
 
+
+        static private List<IValidationRule> deviceNameRules = new List<IValidationRule>()
+                {
+                    new NullRule(),
+                    new NoEmptyStringRule(),
+                    new NoSpacesRule(),
+                    new MinLengthRule(5),
+                    new MaxLengthRule(25),
+                    new NoSqlInjectionRule()
+                };
+        static private List<IValidationRule> deviceTypeRules = new List<IValidationRule>()
+                {
+                    new NullRule(),
+                    new NoEmptyStringRule(),
+                    new MinLengthRule(1),
+                    new MaxLengthRule(20),
+                    new NoSqlInjectionRule()
+                };
+        static private List<IValidationRule> deviceIDRules = new List<IValidationRule>()
+                {
+                    new NullRule(),
+                    new NoEmptyStringRule(),
+                    new NoSpacesRule(),
+                    new MinLengthRule(1),
+                    new MaxLengthRule(250),
+                    new NoSqlInjectionRule()
+                };
+
         /// <summary>
         /// Validates the mail.
         /// Throws exception if an error is reached.
@@ -148,5 +176,55 @@ namespace XPowerClassLibrary.Validator
             return validator.GetErrors();
         }
 
+        /// <summary>
+        /// Validates the device name.
+        /// Throws exception if an error is reached.
+        /// </summary>
+        /// <param name="deviceName">Device name value to validate.</param>
+        static public void ValidateDeviceNameException(string deviceName)
+        {
+            Validator validator = new Validator("DeviceName", deviceNameRules);
+            if (!validator.Validate(deviceName))
+            {
+                foreach (var exception in validator.GetExceptions())
+                {
+                    throw exception;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates the device ID.
+        /// Throws exception if an error is reached.
+        /// </summary>
+        /// <param name="deviceID">Device ID value to validate.</param>
+        static public void ValidateDeviceIDException(string deviceID)
+        {
+            Validator validator = new Validator("DeviceID", deviceIDRules);
+            if (!validator.Validate(deviceID))
+            {
+                foreach (var exception in validator.GetExceptions())
+                {
+                    throw exception;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates the device type.
+        /// Throws exception if an error is reached.
+        /// </summary>
+        /// <param name="deviceType">Device type value to validate.</param>
+        static public void ValidateDeviceTypeException(string deviceType)
+        {
+            Validator validator = new Validator("DeviceType", deviceTypeRules);
+            if (!validator.Validate(deviceType))
+            {
+                foreach (var exception in validator.GetExceptions())
+                {
+                    throw exception;
+                }
+            }
+        }
     }
 }

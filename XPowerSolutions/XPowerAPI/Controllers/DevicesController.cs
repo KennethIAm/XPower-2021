@@ -26,7 +26,7 @@ namespace XPowerAPI.Controllers
             _clientFactory = clientFactory;
         }
 
-        [HttpPost()]
+        [HttpPost("CreateDevice")]
         public async Task<IActionResult> CreateDevice([FromBody] CreateDeviceRequest request)
         {
             try
@@ -247,10 +247,8 @@ namespace XPowerAPI.Controllers
             {
                 if (assignDeviceRequest is null)
                     return BadRequest(GenerateExceptionMessage("Invalid Data Given."));
-
                 if (string.IsNullOrEmpty(assignDeviceRequest.UserTokenRequest) || string.IsNullOrEmpty(assignDeviceRequest.UniqueDeviceIdentifier))
                     return NotFound(GenerateExceptionMessage("Data couldn't be found."));
-
                 IDevice assignedDevice = await _deviceService.AssignDeviceToUserAsync(assignDeviceRequest);
 
                 if (assignedDevice is null)

@@ -1,0 +1,39 @@
+﻿@page "/device/registerdevice"
+@attribute [Authorize]
+<div class="row gx-5">
+    <div class="position-absolute top-50 start-50 translate-middle col-12 col-sm-7 col-md-8 col-lg-8 col-xl-5">
+        <div class="card bg-primary">
+            <div class="card-body">
+                <DisplayTextHeader HeaderText="Tilføj enhed" HeaderType="HeaderType.H2" />
+
+                @if (!string.IsNullOrEmpty(_message))
+                {
+                    <DisplayAlertMessage Message="@_message" AlertType="AlertType.Default" ClearMessageInMilliseconds="5000" />
+                }
+
+
+            <EditForm EditContext="_editContext" OnValidSubmit="OnValidForm_AddDeviceAsync">
+                <div class="mb-3">
+                    <label for="inputID" class="fs-6 text-light">Enheds-ID :</label>
+                    <InputText @bind-Value="_model.Id" DisplayName="ID" id="inputID" type="id" class="form-control form-control-sm" placeholder="Enheds-ID" />
+                    <ValidationMessage For="() => _model.Id" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="inputName" class="fs-6 text-light">Navn :</label>
+                    <InputText @bind-Value="_model.Name" DisplayName="Name" id="inputName" type="name" class="form-control form-control-sm" placeholder="Eksempelnavn" />
+                    <ValidationMessage For="() => _model.Name" />
+                </div>
+
+                <div style="text-align: right; max-width: 700px; width: 100%; display: inline;">
+                    <button class="btn btn-outline-success btn-sm" style="margin-right: 10px; min-width: 150px;">Registrér enhed</button>
+                    <button class="btn btn-outline-success btn-sm" style="min-width:150px;" @onclick="GoToIndex">Tilbage</button>
+                </div>
+            </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+
+}
