@@ -1,26 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using XPowerClassLibrary.Device.Enums;
+﻿using XPowerClassLibrary.Device.Enums;
 
 namespace XPowerClassLibrary.Device.Models
 {
-    public class UpdateDeviceRequest
+    public class CreateDeviceRequest
     {
-        public int DeviceId { get; set; }
         public int DeviceTypeId { get; set; }
         public DeviceFunctionalStatus DeviceFunctionalStatus { get; set; }
         public DeviceConnectionState DeviceConnectionState { get; set; }
+        public string UniqueDeviceIdentifier { get; set; }
         public string DeviceName { get; set; }
         public string DeviceIpAddress { get; set; }
 
-        public UpdateDeviceRequest() { }
+        public CreateDeviceRequest() { }
 
-        public UpdateDeviceRequest(int deviceTypeId, DeviceFunctionalStatus deviceFunctionalStatus, DeviceConnectionState deviceConnectionState, string deviceName, string deviceIpAddress)
+        public CreateDeviceRequest(int deviceTypeId, DeviceFunctionalStatus deviceFunctionalStatus, DeviceConnectionState deviceConnectionState, string uniqueDeviceIdentifier, string deviceName, string deviceIpAddress)
         {
             DeviceTypeId = deviceTypeId;
             DeviceFunctionalStatus = deviceFunctionalStatus;
             DeviceConnectionState = deviceConnectionState;
+            UniqueDeviceIdentifier = uniqueDeviceIdentifier;
             DeviceName = deviceName;
             DeviceIpAddress = deviceIpAddress;
         }

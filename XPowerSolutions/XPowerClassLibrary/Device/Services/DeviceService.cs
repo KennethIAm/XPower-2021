@@ -1,17 +1,30 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using XPowerClassLibrary.Device.Entities;
 using XPowerClassLibrary.Device.Enums;
 using XPowerClassLibrary.Device.Models;
+using XPowerClassLibrary.Device.Models.Requests;
 using XPowerClassLibrary.Device.Repository;
+using XPowerClassLibrary.Users;
 
 namespace XPowerClassLibrary.Device.Services
 {
     public class DeviceService : IDeviceService
     {
         private readonly IDeviceRepository _repository;
+        private readonly IUserService _userService;
 
-        public DeviceService(IDeviceRepository repository)
+        public DeviceService(IDeviceRepository repository, IUserService userService)
         {
             _repository = repository;
+            _userService = userService;
+        }
+
+        public async Task<IDevice> AssignDeviceToUserAsync(AssignDeviceToUserRequest assignDeviceRequest)
+        {
+            return await _repository.AssignDeviceToUserAsync(assignDeviceRequest);
         }
 
         public async Task<IDevice> CreateDeviceAsync(CreateDeviceRequest request)
@@ -24,29 +37,63 @@ namespace XPowerClassLibrary.Device.Services
             return await _repository.DeleteDeviceByIdAsync(id);
         }
 
-        public async Task<IDevice> GetDeviceById(int id)
+        public async Task<IDevice> DeviceOnlineAsync(DeviceOnlineRequest onlineRequest)
         {
-            return await _repository.GetDeviceById(id);
+            IDevice device = await _repository.FindDeviceByUniqueIdentifier(onlineRequest.UniqueDeviceIdentifier);
+
+            if (device is null)
+            {
+                return await _repository.CreateDeviceAsync(new CreateDeviceRequest
+                {
+                    DeviceName = "",
+                    DeviceIpAddress = onlineRequest.IPAddress,
+                    DeviceFunctionalStatus = DeviceFunctionalStatus.Off,
+                    DeviceConnectionState = DeviceConnectionState.Connected,
+                    UniqueDeviceIdentifier = onlineRequest.UniqueDeviceIdentifier,
+                    DeviceTypeId = onlineRequest.DeviceTypeId
+                });
+            }
+
+            return await _repository.UpdateDeviceAsync(new UpdateDeviceRequest
+            {
+                DeviceId = device.Id,
+                DeviceTypeId = device.DeviceType.Id,
+                DeviceName = device.Name,
+                DeviceFunctionalStatus = device.FunctionalStatus,
+                DeviceConnectionState = device.ConnectionState,
+                UniqueDeviceIdentifier = onlineRequest.UniqueDeviceIdentifier,
+                DeviceIpAddress = onlineRequest.IPAddress
+            });
         }
 
-        public async Task<IDevice> UpdateDevice(UpdateDeviceRequest updateRequest)
+        public async Task<IDevice> GetDeviceByIdAsync(int id)
         {
-            return await _repository.UpdateDevice(updateRequest);
+            return await _repository.GetDeviceByIdAsync(id);
         }
 
-        //public async Task<DeviceConnectionState> GetDeviceConnectionState(int id)
-        //{
-        //    return await _repository.GetDeviceConnectionState(id);
-        //}
+        public async Task<IUserDevice> GetUsersOwnedDevices(UserDevicesRequest devicesRequest)
+        {
+            var user = await _userService.GetUserByTokenAsync(devicesRequest.RefreshToken);
 
-        //public async Task<DeviceConnectionState> UpdateDeviceConnectionState(int id, DeviceConnectionState state)
-        //{
-        //    return await _repository.UpdateDeviceConnectionState(id, state);
-        //}
+            if (user is null)
+                throw new NullReferenceException("Returned user was null or not found.");
 
-        //public async Task<DeviceFunctionalStatus> UpdateDeviceStatus(int id, DeviceFunctionalStatus status)
-        //{
-        //    return await _repository.UpdateDeviceStatus(id, status);
-        //}
+            var devices = await _repository.GetUsersOwnedDevices(user.Id);
+
+            IUserDevice userDevices = new UserDevice()
+            {
+                Id = user.Id,
+                Mail = user.Mail,
+                Username = user.Username,
+                OwnedDevices = devices as List<DeviceInformationView>
+            };
+
+            return await Task.FromResult(userDevices);
+        }
+
+        public async Task<IDevice> UpdateDeviceAsync(UpdateDeviceRequest updateRequest)
+        {
+            return await _repository.UpdateDeviceAsync(updateRequest);
+        }
     }
 }

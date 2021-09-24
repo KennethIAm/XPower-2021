@@ -1,10 +1,11 @@
 ﻿using System.Data.SqlClient;
 using XPowerClassLibrary.Device.Repository;
 using XPowerClassLibrary.Device.Services;
+using XPowerClassLibrary.Users;
 
 namespace XPowerClassLibrary.Device
 {
-    public class DeviceServiceFactory
+    public static class DeviceServiceFactory
     {
         /// <summary>
         /// SqlConnection with permission to create new device via SPCreateNewDevice
@@ -68,7 +69,7 @@ namespace XPowerClassLibrary.Device
 
         public static IDeviceService GetDeviceServiceDB()
         {
-            return new DeviceService(new DbDeviceRepository());
+            return new DeviceService(new DbDeviceRepository(), UserServiceFactory.GetUserServiceDB());
         }
     }
 }

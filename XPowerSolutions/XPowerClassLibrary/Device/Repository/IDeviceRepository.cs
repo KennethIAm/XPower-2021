@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using XPowerClassLibrary.Device.Enums;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using XPowerClassLibrary.Device.Models;
 
 namespace XPowerClassLibrary.Device.Repository
@@ -7,12 +7,11 @@ namespace XPowerClassLibrary.Device.Repository
     public interface IDeviceRepository
     {
         Task<IDevice> CreateDeviceAsync(CreateDeviceRequest createRequest);
-        //Task<DeviceConnectionState> GetDeviceConnectionState(int id);
-        //Task<DeviceFunctionalStatus> GetDeviceFunctionalStatus(int id);
-        //Task<DeviceConnectionState> UpdateDeviceConnectionState(int id, DeviceConnectionState state);
-        //Task<DeviceFunctionalStatus> UpdateDeviceStatus(int id, DeviceFunctionalStatus status);
-        Task<IDevice> UpdateDevice(UpdateDeviceRequest updateRequest);
-        Task<IDevice> GetDeviceById(int id);
+        Task<IDevice> UpdateDeviceAsync(UpdateDeviceRequest updateRequest);
+        Task<IDevice> GetDeviceByIdAsync(int id);
         Task<bool> DeleteDeviceByIdAsync(int id);
+        Task<IDevice> FindDeviceByUniqueIdentifier(string uniqueIdentifier);
+        Task<IDevice> AssignDeviceToUserAsync(AssignDeviceToUserRequest assignDeviceRequest);
+        Task<IEnumerable<IDevice>> GetUsersOwnedDevices(int userId);
     }
 }

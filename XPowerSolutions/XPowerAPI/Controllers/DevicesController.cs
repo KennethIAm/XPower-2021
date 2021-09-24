@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Data;
 using System.Net;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Device.Models;
+using XPowerClassLibrary.Device.Models.Requests;
 using XPowerClassLibrary.Device.Services;
-using XPowerClassLibrary.Validator;
 
 namespace XPowerAPI.Controllers
 {
@@ -18,10 +18,12 @@ namespace XPowerAPI.Controllers
     public class DevicesController : BaseController
     {
         private readonly IDeviceService _deviceService;
+        private readonly IHttpClientFactory _clientFactory;
 
-        public DevicesController(IDeviceService deviceService)
+        public DevicesController(IDeviceService deviceService, IHttpClientFactory clientFactory)
         {
             _deviceService = deviceService;
+            _clientFactory = clientFactory;
         }
 
         [HttpPost()]
@@ -31,17 +33,17 @@ namespace XPowerAPI.Controllers
             {
                 if (UsingInvalidRefreshToken())
                 {
-                    return Unauthorized(new { message = "Invalid Token." });
+                    return Unauthorized(GenerateExceptionMessage("Invalid Token."));
                 }
 
                 if (request is null)
                 {
-                    return BadRequest(new { message = "Invalid Device Request." });
+                    return BadRequest(GenerateExceptionMessage("Invalid Device Request."));
                 }
 
-                if (UsingInvalidIpAddress(request.DeviceIpAddress))
+                if (UsingValidIpAddress(request.DeviceIpAddress))
                 {
-                    return BadRequest(new { message = "Invalid Device Request, IPAddress not readable." });
+                    return BadRequest(GenerateExceptionMessage("Invalid Device Request, IPAddress not readable."));
                 }
 
                 IDevice device = await _deviceService.CreateDeviceAsync(request);
@@ -55,19 +57,83 @@ namespace XPowerAPI.Controllers
             }
             catch (ArgumentNullException)
             {
-                return BadRequest(new { message = "Invalid Inputs. Device was not created." });
+                return BadRequest(GenerateExceptionMessage("Invalid Inputs. Device was not created."));
             }
             catch (ArgumentException)
             {
-                return BadRequest(new { message = "Invalid Inputs. Device was not created." });
+                return BadRequest(GenerateExceptionMessage("Invalid Inputs. Device was not created."));
             }
             catch (NullReferenceException nullRefEx)
             {
-                return BadRequest(new { message = nullRefEx.Message });
+                return BadRequest(GenerateExceptionMessage(nullRefEx.Message));
             }
             catch (Exception)
             {
-                return BadRequest(new { message = "Unknown error occurred. Device was not created." });
+                return BadRequest(GenerateExceptionMessage("Unknown error occurred. Device was not created."));
+            }
+        }
+        
+        [AllowAnonymous]
+        [HttpGet("IAmOnline")]
+        public async Task<IActionResult> DeviceOnline([FromQuery] DeviceOnlineRequest onlineRequest)
+        {
+            try
+            {
+                if (onlineRequest is null)
+                {
+                    return BadRequest(GenerateExceptionMessage("Invalid Device IAmOnline Request."));
+                }
+
+                if (!UsingValidIpAddress(onlineRequest.IPAddress))
+                {
+                    return BadRequest(GenerateExceptionMessage("Invalid Device IAmOnline Request, IPAddress not readable."));
+                }
+
+                IDevice device = await _deviceService.DeviceOnlineAsync(onlineRequest);
+
+                if (device is null)
+                {
+                    throw new NullReferenceException("An unexpected error occurred. The device could not be handled successfully.");
+                }
+
+                Console.WriteLine($"{onlineRequest.IPAddress} is now Online {onlineRequest.UniqueDeviceIdentifier}");
+                return Ok(device);
+            }
+            catch (NullReferenceException nullRefEx)
+            {
+                return BadRequest(GenerateExceptionMessage(nullRefEx.Message));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(GenerateExceptionMessage(ex.Message));
+            }
+        }
+
+        [HttpGet("mine")]
+        public async Task<IActionResult> GetUsersDevices()
+        {
+            try
+            {
+                var token = GetCurrentUserToken();
+
+                if (UsingInvalidRefreshToken())
+                    return BadRequest(GenerateExceptionMessage("Couldn't authorize request. Invalid token."));
+
+                var usersDevices = await _deviceService.GetUsersOwnedDevices(new UserDevicesRequest { RefreshToken = token });
+
+                if (usersDevices is null)
+                    return NotFound(GenerateExceptionMessage("Couldn't find any owned devices."));
+
+                return Ok(usersDevices);
+            }
+            catch (NullReferenceException)
+            {
+                return BadRequest(GenerateExceptionMessage("An error ocurred while collection the user."));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return BadRequest(GenerateExceptionMessage("An unhandled exception occurred, couldn't successfully complete request."));
             }
         }
 
@@ -78,26 +144,52 @@ namespace XPowerAPI.Controllers
             {
                 if (UsingInvalidRefreshToken())
                 {
-                    return Unauthorized(new { message = "Invalid Token." });
+                    return Unauthorized(GenerateExceptionMessage("Invalid Token."));
                 }
 
                 if (id is 0)
                 {
-                    return NotFound(new { message = "No Device found." });
+                    return NotFound(GenerateExceptionMessage("No Device found."));
                 }
 
-                IDevice device = await _deviceService.GetDeviceById(id);
+                IDevice device = await _deviceService.GetDeviceByIdAsync(id);
 
                 if (device is null)
                 {
-                    return NotFound(new { message = "No Device found." });
+                    return NotFound(GenerateExceptionMessage("No Device found."));
                 }
 
                 return Ok(device);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest(new { message = "Unknown error occurred. Device not found." });
+                return BadRequest(GenerateExceptionMessage(ex.Message));
+            }
+        }
+
+        [HttpGet("send-command")]
+        public async Task<IActionResult> SendDeviceCommand([FromQuery] string command, string ipAddress)
+        {
+            try
+            {
+                var uri = new Uri($"http://{ipAddress}");
+                var response = await _clientFactory.CreateClient().GetAsync($"{uri}?{command}", HttpCompletionOption.ResponseHeadersRead);
+
+                if (response.IsSuccessStatusCode) 
+                {
+                    var data = await response.Content.ReadAsStringAsync();
+
+                    var powerData = JsonSerializer.Deserialize<PowerUsageModel>(data);
+
+                    return Ok(powerData);
+                }
+
+                return NotFound(GenerateExceptionMessage("Command not found."));
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(GenerateExceptionMessage($"Couldn't execute device command: {ex.Message}"));
             }
         }
 
@@ -108,20 +200,20 @@ namespace XPowerAPI.Controllers
             {
                 if (UsingInvalidRefreshToken())
                 {
-                    return Unauthorized(new { message = "Invalid Token." });
+                    return Unauthorized(GenerateExceptionMessage("Invalid Token."));
                 }
 
                 if (updateRequest is null)
                 {
-                    return BadRequest(new { message = "Invalid Device Update Request." });
+                    return BadRequest(GenerateExceptionMessage("Invalid Device Update Request."));
                 }
 
-                if (UsingInvalidIpAddress(updateRequest.DeviceIpAddress))
+                if (!UsingValidIpAddress(updateRequest.DeviceIpAddress))
                 {
-                    return BadRequest(new { message = "Invalid Device Update Request, IPAddress not readable." });
+                    return BadRequest(GenerateExceptionMessage("Invalid Device Update Request, IPAddress not readable."));
                 }
 
-                IDevice device = await _deviceService.UpdateDevice(updateRequest);
+                IDevice device = await _deviceService.UpdateDeviceAsync(updateRequest);
 
                 if (device is null)
                 {
@@ -132,19 +224,48 @@ namespace XPowerAPI.Controllers
             }
             catch (ArgumentNullException)
             {
-                return BadRequest(new { message = "Invalid Inputs. Device was not updated." });
+                return BadRequest(GenerateExceptionMessage("Invalid Inputs. Device was not updated."));
             }
             catch (ArgumentException)
             {
-                return BadRequest(new { message = "Invalid Inputs. Device was not updated." });
+                return BadRequest(GenerateExceptionMessage("Invalid Inputs. Device was not updated."));
             }
             catch (NullReferenceException nullRefEx)
             {
-                return BadRequest(new { message = nullRefEx.Message });
+                return BadRequest(GenerateExceptionMessage(nullRefEx.Message));
             }
             catch (Exception)
             {
-                return BadRequest(new { message = "Unknown error occurred. Device was not updated." });
+                return BadRequest(GenerateExceptionMessage("Unknown error occurred. Device was not updated."));
+            }
+        }
+
+        [HttpPut("assign-to-me")]
+        public async Task<IActionResult> AssignDeviceToUser([FromBody] AssignDeviceToUserRequest assignDeviceRequest)
+        {
+            try
+            {
+                if (assignDeviceRequest is null)
+                    return BadRequest(GenerateExceptionMessage("Invalid Data Given."));
+
+                if (string.IsNullOrEmpty(assignDeviceRequest.UserTokenRequest) || string.IsNullOrEmpty(assignDeviceRequest.UniqueDeviceIdentifier))
+                    return NotFound(GenerateExceptionMessage("Data couldn't be found."));
+
+                IDevice assignedDevice = await _deviceService.AssignDeviceToUserAsync(assignDeviceRequest);
+
+                if (assignedDevice is null)
+                    return BadRequest(GenerateExceptionMessage("Something went wrong while assigning device to user."));
+
+                return Ok(assignedDevice);
+            }
+            catch (DuplicateNameException ex)
+            {
+                return Conflict(GenerateExceptionMessage(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                //return BadRequest("An error occurred. Couldn't handle the request.");
+                return BadRequest(GenerateExceptionMessage(ex.Message));
             }
         }
 
@@ -155,26 +276,26 @@ namespace XPowerAPI.Controllers
             {
                 if (UsingInvalidRefreshToken())
                 {
-                    return Unauthorized(new { message = "Invalid Token." });
+                    return Unauthorized(GenerateExceptionMessage("Invalid Token."));
                 }
 
                 if (id is 0)
                 {
-                    return NotFound(new { message = "No Device found." });
+                    return NotFound(GenerateExceptionMessage("No Device found."));
                 }
 
                 bool isDeleted = await _deviceService.DeleteDeviceByIdAsync(id);
 
                 if (!isDeleted)
                 {
-                    return Conflict(new { message = "Couldn't delete device." });
+                    return Conflict(GenerateExceptionMessage("Couldn't delete device."));
                 }
 
-                return Ok(new { message = "Device was successfully deleted." });
+                return Ok(GenerateExceptionMessage("Device was successfully deleted."));
             }
             catch (Exception)
             {
-                return BadRequest(new { message = "Unknown error occurred. Device was not deleted" });
+                return BadRequest(GenerateExceptionMessage("Unknown error occurred. Device was not deleted"));
             }
         }
 
@@ -185,9 +306,18 @@ namespace XPowerAPI.Controllers
             return string.IsNullOrEmpty(token) || string.IsNullOrWhiteSpace(token);
         }
 
-        private bool UsingInvalidIpAddress(string ipAddress)
+        private bool UsingValidIpAddress(string ipAddress)
         {
-            return IPAddress.TryParse(ipAddress, out IPAddress parsedAddress);
+            try
+            {
+                var address = IPAddress.Parse(ipAddress);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }
