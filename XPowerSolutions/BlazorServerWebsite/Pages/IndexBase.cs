@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Device.Entities;
 using XPowerClassLibrary.Device.Enums;
@@ -31,24 +32,34 @@ namespace BlazorServerWebsite.Pages
         public UserDeviceResponse UserDevices { get; set; }
         protected string RefreshToken { get; set; }
         protected string JwtToken { get; set; }
+        protected string Username { get; set; }
+        protected bool WaitForData { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
+            WaitForData = true;
             await LoadDevices();
             _context = await AuthenticationState;
+
+            if (UserDevices is null)
+            {
+                WaitForData = false;
+            }
+            StateHasChanged();
         }
 
+        // Navigate to AddDevicePage
         protected void GoToCreateDevice()
         {
             NavigationManager.NavigateTo("/device/registerdevice");
         }
 
+        // Request user's devices from the API
         private async Task LoadDevices()
         {
-            await RefreshTokensAsync();
+            await RenewTokensAsync();
 
             var cookieContainer = new CookieContainer();
-
             using (var handler = new HttpClientHandler { CookieContainer = cookieContainer })
             {
                 using (var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) })
@@ -58,11 +69,11 @@ namespace BlazorServerWebsite.Pages
                         new AuthenticationHeaderValue("Bearer", JwtToken);
                     cookieContainer.Add(new Uri(Settings.Endpoints.BaseEndpoint), new Cookie("refreshToken", RefreshToken));
 
-                    var createDeviceResponseMessage = await client.GetAsync(endpoint);
+                    var resopnse = await client.GetAsync(endpoint);
 
-                    if (createDeviceResponseMessage.IsSuccessStatusCode)
+                    if (resopnse.IsSuccessStatusCode)
                     {
-                        string jsonString = await createDeviceResponseMessage.Content.ReadAsStringAsync();
+                        string jsonString = await resopnse.Content.ReadAsStringAsync();
                         UserDevices = JsonConvert.DeserializeObject<UserDeviceResponse>(jsonString);
 
                         Console.WriteLine("Devices retrieved!");
@@ -70,27 +81,32 @@ namespace BlazorServerWebsite.Pages
                 }
             }
         }
-
-        private async Task RefreshTokensAsync()
+        
+        // Request new tokens from the API
+        private async Task RenewTokensAsync()
         {
             string token = await LocalStorage.GetItemAsync<string>(Settings.RefreshTokenKey);
 
             var cookieContainer = new CookieContainer();
-
             using (var handler = new HttpClientHandler { CookieContainer = cookieContainer })
             {
                 using (var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) })
                 {
                     cookieContainer.Add(client.BaseAddress, new Cookie(Settings.RefreshTokenKey, token));
-                    var result = await client.PostAsJsonAsync<string>(Settings.Endpoints.RefreshTokenEndpoint, token);
-                    AuthenticateResponse authenticateResponseRefresh = result.Content.ReadAsAsync<AuthenticateResponse>().Result;
-                    await LocalStorage.SetItemAsync<string>(Settings.RefreshTokenKey, authenticateResponseRefresh.RefreshToken);
-                    await LocalStorage.SetItemAsync<string>(Settings.JwtKey, authenticateResponseRefresh.JwtToken);
+                    var response = await client.PostAsJsonAsync<string>(Settings.Endpoints.RefreshTokenEndpoint, token);
 
-                    Console.WriteLine($"Server Response Code from Auth: {result.StatusCode}");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        AuthenticateResponse authenticateResponseRefresh = await response.Content.ReadAsAsync<AuthenticateResponse>();
+                        Username = authenticateResponseRefresh.UserObject.Username;
+                        await LocalStorage.SetItemAsync<string>(Settings.RefreshTokenKey, authenticateResponseRefresh.RefreshToken);
+                        await LocalStorage.SetItemAsync<string>(Settings.JwtKey, authenticateResponseRefresh.JwtToken);
 
-                    RefreshToken = authenticateResponseRefresh.RefreshToken;
-                    JwtToken = authenticateResponseRefresh.JwtToken;
+                        Console.WriteLine($"Server Response Code from Auth: {response.StatusCode}");
+
+                        RefreshToken = authenticateResponseRefresh.RefreshToken;
+                        JwtToken = authenticateResponseRefresh.JwtToken;
+                    }
                 }
             }
         }

@@ -5,33 +5,27 @@
 @*<h4 class="text-dark text-center">Velkommen til XPower Solutions!</h4>
 <br />*@
 <div class="card bg-primary page-layout">
-    <br />
-    <h2 class="text-dark text-center text-light">[STED NAVN]</h2>
-    <br />
-    <h5 class="text-dark text-center text-light">Totalt strømforbrug</h5>
-
-    <div class="container">
-        <div class="column">
-            <h1 class="text-center text-light" style="font-weight: bold;">5</h1>
-            <p class="text-center text-light">KW/H</p>
-        </div>
-        <div class="column">
-            <h1 class="text-center text-light" style="font-weight: bold; color: red !important;">23</h1>
-            <p class="text-center text-light" style="color: red !important;">KR / KW/H</p>
-        </div>
-    </div>
-
-
-
-
-
-    <br />
     <div style="padding-left: 20px; padding-right: 20px;">
-        <h4 class="text-dark text-center text-light">Test tekst, det her er bare for at teste. En test er en test er en test. En, to, tre, test den tekst. Teksttest. Bare tekst. Man kan ikke gå galt med tekst</h4>
-
-
         @if (UserDevices is not null)
         {
+            <br />
+            <h2 class="text-dark text-center text-light">Velkommen, @Username</h2>
+            <br />
+            <h5 class="text-dark text-center text-light">Totalt strømforbrug</h5>
+
+            <div class="container">
+                <div class="column">
+                    <h1 class="text-center text-light" style="font-weight: bold;">5</h1>
+                    <p class="text-center text-light">KW/H</p>
+                </div>
+                <div class="column">
+                    <h1 class="text-center text-light" style="font-weight: bold; color: red !important;">23</h1>
+                    <p class="text-center text-light" style="color: red !important;">KR / KW/H</p>
+                </div>
+            </div>
+
+            <br />
+            <h4 class="text-dark text-center text-light">Test tekst, det her er bare for at teste. En test er en test er en test. En, to, tre, test den tekst. Teksttest. Bare tekst. Man kan ikke gå galt med tekst</h4>
             <table class="table text-light">
                 <thead>
                     <tr>
@@ -42,40 +36,84 @@
                 <tbody>
                     @foreach (var device in UserDevices.OwnedDevices)
                     {
-                    <tr>
-                        <td ><a href="device/viewdevice/@device.Id" style="color:white;">@device.Name</a></td>
-                        @if (@device.FunctionalStatus == 3)
-                        {
-                            <td style="color:lime;">Tændt</td>
-                        }
-                        else if (@device.FunctionalStatus == 2)
-                        {
-                            <td style="color:red;">Slukket</td>
-                        }
-                        else if (@device.FunctionalStatus == 1)
-                        {
-                            <td style="color:red;">Deaktiveret</td>
-                        }
-                        else if (@device.FunctionalStatus == 0)
-                        {
-                            <td style="color:red;">Udefineret</td>
-                        }
-                        else
-                        {
-                            <td>Ukendt</td>
-                        }
+                        <tr>
+                            <td><a href="device/viewdevice/@device.Id" style="color:white;">@device.Name</a></td>
+                            @if (@device.FunctionalStatus == 3)
+                            {
+                                if (device.DeviceType.Id == 3)
+                                {
+                                    <td style="color:lime;">Åbent</td>
+                                }
+                                else
+                                {
+                                    <td style="color:lime;">Tændt</td>
+                                }
+                            }
+                            else if (@device.FunctionalStatus == 2)
+                            {
+                                if (device.DeviceType.Id == 3)
+                                {
+                                    <td style="color:red;">Lukket</td>
+                                }
+                                else
+                                {
+                                    <td style="color:red;">Slukket</td>
+                                }
+                            }
+                            else if (@device.FunctionalStatus == 1)
+                            {
+                                <td style="color:red;">Deaktiveret</td>
+                            }
+                            else if (@device.FunctionalStatus == 0)
+                            {
+                                <td style="color:red;">Udefineret</td>
+                            }
+                            else
+                            {
+                                <td>Ukendt</td>
+                            }
 
 
-                    </tr>
+                        </tr>
                     }
                 </tbody>
             </table>
+            <button class="btn btn-outline-success btn-sm" @onclick="GoToCreateDevice" style="width: 100%;">Tilføj Enhed</button>
         }
         else
         {
-            <h4 class="text-center text-light">Indlæser enheder...</h4>
+            if (WaitForData == true)
+            {
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <div style="width: 300px" class="d-flex mx-auto align-items-center">
+                    <strong class="text-light" style="font-size:25px;">Indlæser enheder... </strong>
+                    <div class="spinner-border text-light ml-auto" role="status" aria-hidden="true"></div>
+                </div>
+                <br />
+                <br />
+                <br />
+                <br />
+            }
+            else
+            {
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <div style="width: 300px" class="d-flex mx-auto align-items-center">
+                    <strong class="text-light" style="font-size:25px;">Der opstod en fejl.</strong>
+                </div>
+                <br />
+                <br />
+                <br />
+                <br />
+            }
         }
-        <button class="btn btn-outline-success btn-sm" @onclick="GoToCreateDevice" style="width: 100%;">Tilføj Enhed</button>
     </div>
     <br />
 </div>

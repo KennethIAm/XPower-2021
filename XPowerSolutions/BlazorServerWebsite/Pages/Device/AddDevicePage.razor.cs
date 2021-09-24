@@ -32,6 +32,8 @@ namespace BlazorServerWebsite.Pages.Device
         private AssignDeviceModel _model;
         private EditContext _editContext;
         private string _message = string.Empty;
+        protected string RefreshToken { get; set; }
+        protected string JwtToken { get; set; }
 
         protected override void OnInitialized()
         {
@@ -49,64 +51,82 @@ namespace BlazorServerWebsite.Pages.Device
                 return;
             }
 
-            string token = await LocalStorage.GetItemAsync<string>(Settings.RefreshTokenKey);
+            await RenewTokensAsync();
 
-
+            var assignDeviceRequest = CreateAssignDeviceToUserRequest();
 
             var cookieContainer = new CookieContainer();
-            using var handler = new HttpClientHandler { CookieContainer = cookieContainer };
-            using var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) };
+            using (var handler = new HttpClientHandler { CookieContainer = cookieContainer })
+            {
+                using (var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) })
+                {
+                    var endpoint = $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.AssignDeviceEndpoint}";
+                    client.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", JwtToken);
+                    cookieContainer.Add(new Uri(Settings.Endpoints.BaseEndpoint), new Cookie("refreshToken", RefreshToken));
 
-            cookieContainer.Add(client.BaseAddress, new Cookie(Settings.RefreshTokenKey, token));
-            var result = await client.PostAsJsonAsync<string>(Settings.Endpoints.RefreshTokenEndpoint, token);
-            AuthenticateResponse authenticateResponseRefresh = result.Content.ReadAsAsync<AuthenticateResponse>().Result;
-            await LocalStorage.SetItemAsync<string>(Settings.RefreshTokenKey, authenticateResponseRefresh.RefreshToken);
-            await LocalStorage.SetItemAsync<string>(Settings.JwtKey, authenticateResponseRefresh.JwtToken);
-
-            Console.WriteLine($"Server Response Code from Auth: {result.StatusCode}");
-
-            token = authenticateResponseRefresh.RefreshToken;
-            string jwtToken = authenticateResponseRefresh.JwtToken;
+                    var resopnse = await client.PutAsJsonAsync(endpoint, assignDeviceRequest);
 
 
+                    if (resopnse.IsSuccessStatusCode)
+                    {
+                        HardwareDevice device = await resopnse.Content.ReadAsAsync<HardwareDevice>();
+                        Console.WriteLine("Device was created!");
+
+                        Console.WriteLine($"Created Device: {assignDeviceRequest.DeviceName}");
+
+                        _message = "Enheden er blevet registreret.";
+
+                        GoToIndex();
+                    }
+                    else
+                    {
+                        _message = "Der opstod en fejl.";
+                    }
+                }
+            }
+        }
+
+        private AssignDeviceToUserRequest CreateAssignDeviceToUserRequest()
+        {
             var assignDeviceRequest = new AssignDeviceToUserRequest
             {
                 UniqueDeviceIdentifier = _model.Id,
                 DeviceName = _model.Name,
-                UserTokenRequest = token
+                UserTokenRequest = RefreshToken
             };
 
-            cookieContainer = new CookieContainer();
-
-            using (client)
-            {
-                var endpoint = $"{Settings.Endpoints.BaseEndpoint}{Settings.Endpoints.AssignDeviceEndpoint}";
-                client.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", jwtToken);
-                cookieContainer.Add(new Uri(Settings.Endpoints.BaseEndpoint), new Cookie("refreshToken", token));
-
-                var createDeviceResponseMessage = await client.PutAsJsonAsync(endpoint, assignDeviceRequest);
-
-
-                if (createDeviceResponseMessage.IsSuccessStatusCode)
-                {
-                    HardwareDevice device = await createDeviceResponseMessage.Content.ReadAsAsync<HardwareDevice>();
-                    Console.WriteLine("Device was created!");
-
-                    Console.WriteLine($"Created Device: {assignDeviceRequest.DeviceName} : {assignDeviceRequest.DeviceTypeId}");
-
-                    _message = "Enheden er blevet registreret.";
-
-                    GoToIndex();
-                }
-                else
-                {
-                    _message = createDeviceResponseMessage.ToString();
-                }
-            }
-
+            return assignDeviceRequest;
         }
 
+        // Get new tokens from the API
+        private async Task RenewTokensAsync()
+        {
+            string token = await LocalStorage.GetItemAsync<string>(Settings.RefreshTokenKey);
+
+            var cookieContainer = new CookieContainer();
+            using (var handler = new HttpClientHandler { CookieContainer = cookieContainer })
+            {
+                using (var client = new HttpClient(handler) { BaseAddress = new Uri(Settings.Endpoints.BaseEndpoint) })
+                {
+                    cookieContainer.Add(client.BaseAddress, new Cookie(Settings.RefreshTokenKey, token));
+                    var response = await client.PostAsJsonAsync<string>(Settings.Endpoints.RefreshTokenEndpoint, token);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        AuthenticateResponse authenticateResponseRefresh = await response.Content.ReadAsAsync<AuthenticateResponse>();
+                        await LocalStorage.SetItemAsync<string>(Settings.RefreshTokenKey, authenticateResponseRefresh.RefreshToken);
+                        await LocalStorage.SetItemAsync<string>(Settings.JwtKey, authenticateResponseRefresh.JwtToken);
+
+                        Console.WriteLine($"Server Response Code from Auth: {response.StatusCode}");
+
+                        RefreshToken = authenticateResponseRefresh.RefreshToken;
+                        JwtToken = authenticateResponseRefresh.JwtToken;
+                    }
+                }
+            }
+        }
+
+        // Navigate to Index
         protected void GoToIndex()
         {
             NavigationManager.NavigateTo("/");
