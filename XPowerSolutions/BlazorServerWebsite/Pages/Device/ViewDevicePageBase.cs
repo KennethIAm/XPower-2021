@@ -95,13 +95,13 @@ namespace BlazorServerWebsite.Pages.Device
                         UserDevice = JsonConvert.DeserializeObject<HardwareDevice>(jsonString);
 
                         Console.WriteLine("Device retrieved!");
+                        if (UserDevice.DeviceType.Id != 3)
+                        {
+                            // Gets the electricity ussage of the device if it's 
+                            await GetElectricityUsage();
+                        }
                     }
                 }
-            }
-            if (UserDevice.DeviceType.Id != 3)
-            {
-                // Gets the electricity ussage of the device if it's 
-                await GetElectricityUsage();
             }
 
             SetOnOffText(UserDevice.DeviceType.Id);
@@ -179,6 +179,7 @@ namespace BlazorServerWebsite.Pages.Device
                         }
                         else
                         {
+                            // Error message
                             _message = "Kunne ikke oprette forbindelse til enheden.";
                         }
                     }
@@ -197,6 +198,7 @@ namespace BlazorServerWebsite.Pages.Device
             OnOffDisabled = false;
         }
 
+        // Gets currrent electricity usage of device
         private async Task GetElectricityUsage()
         {
             string command = "function0";
@@ -223,6 +225,7 @@ namespace BlazorServerWebsite.Pages.Device
                         }
                         else
                         {
+                            // Error message
                             _message = "Kunne ikke oprette forbindelse til enheden.";
                         }
                     }
@@ -255,6 +258,7 @@ namespace BlazorServerWebsite.Pages.Device
                     }
                     else
                     {
+                        // Error message
                         MessageObject message = await response.Content.ReadAsAsync<MessageObject>();
                         _message = message.Message;
                     }
@@ -262,7 +266,7 @@ namespace BlazorServerWebsite.Pages.Device
             }
         }
 
-        // Create UpdateDeviceRequest
+        // Initialize UpdateDeviceRequest.
         private UpdateDeviceRequest CreateUpdateDeviceRequest()
         {
             UpdateDeviceRequest request = new UpdateDeviceRequest(UserDevice.Id, UserDevice.DeviceType.Id, UserDevice.FunctionalStatus,
@@ -270,7 +274,7 @@ namespace BlazorServerWebsite.Pages.Device
             return request;
         }
 
-        // Get new tokens from the API
+        // Get new tokens from the API.
         private async Task RenewTokensAsync()
         {
             string token = await LocalStorage.GetItemAsync<string>(Settings.RefreshTokenKey);

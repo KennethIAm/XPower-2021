@@ -31,7 +31,7 @@ namespace BlazorServerWebsite.Pages.Account
 
             if (!_model.IsValidForm())
             {
-                _message = "En eller flere felter er ikke gyldige.";
+                _message = "Ét eller flere felter er ugyldige.";
                 return;
             }
 
@@ -68,16 +68,19 @@ namespace BlazorServerWebsite.Pages.Account
                 {
                     Logger.LogInformation("Given user after creation was null.");
 
-                    _message = "Kunne ikke logge ind, venglist log ind manuelt.";
+                    // Error message
+                    _message = "Kunne ikke logge ind, venlist log ind manuelt.";
                     NavigationManager.NavigateTo("/account/login");
                 }
             }
             else
             {
+                // Error message.
                 _message = "Fejl, kunne ikke oprette bruger.";
             }
         }
 
+        // Intialize new context.
         private void InitializeNewContext()
         {
             _model = new();

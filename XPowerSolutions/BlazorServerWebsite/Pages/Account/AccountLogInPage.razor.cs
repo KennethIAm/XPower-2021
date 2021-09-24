@@ -32,7 +32,7 @@ namespace BlazorServerWebsite.Pages.Account
 
             if (!_model.IsValidForm())
             {
-                _message = "En eller flere felter er ikke gyldige.";
+                _message = "Ét eller flere felter er ugyldige.";
                 return;
             }
 

@@ -49,7 +49,6 @@ namespace XPowerClassLibrary.Validator
                 {
                     new NullRule(),
                     new NoEmptyStringRule(),
-                    new NoSpacesRule(),
                     new MinLengthRule(5),
                     new MaxLengthRule(25),
                     new NoSqlInjectionRule()

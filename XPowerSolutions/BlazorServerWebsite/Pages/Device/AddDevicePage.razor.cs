@@ -40,7 +40,7 @@ namespace BlazorServerWebsite.Pages.Device
             InitializeNewContext();
         }
 
-
+        // Initialize process of assigning device to user on valid form.
         private async Task OnValidForm_AddDeviceAsync()
         {
             _message = "";
@@ -51,6 +51,12 @@ namespace BlazorServerWebsite.Pages.Device
                 return;
             }
 
+            await AssignDeviceAsync();
+        }
+
+        // Request API to assign device to user.
+        private async Task AssignDeviceAsync()
+        {
             await RenewTokensAsync();
 
             var assignDeviceRequest = CreateAssignDeviceToUserRequest();
@@ -66,7 +72,6 @@ namespace BlazorServerWebsite.Pages.Device
                     cookieContainer.Add(new Uri(Settings.Endpoints.BaseEndpoint), new Cookie("refreshToken", RefreshToken));
 
                     var resopnse = await client.PutAsJsonAsync(endpoint, assignDeviceRequest);
-
 
                     if (resopnse.IsSuccessStatusCode)
                     {
@@ -87,6 +92,7 @@ namespace BlazorServerWebsite.Pages.Device
             }
         }
 
+        // Initialize AssignDeviceToUseRequest.
         private AssignDeviceToUserRequest CreateAssignDeviceToUserRequest()
         {
             var assignDeviceRequest = new AssignDeviceToUserRequest
@@ -99,7 +105,7 @@ namespace BlazorServerWebsite.Pages.Device
             return assignDeviceRequest;
         }
 
-        // Get new tokens from the API
+        // Get new tokens from the API.
         private async Task RenewTokensAsync()
         {
             string token = await LocalStorage.GetItemAsync<string>(Settings.RefreshTokenKey);
@@ -126,12 +132,13 @@ namespace BlazorServerWebsite.Pages.Device
             }
         }
 
-        // Navigate to Index
+        // Navigate to Index.
         protected void GoToIndex()
         {
             NavigationManager.NavigateTo("/");
         }
 
+        // Initialize new context.
         private void InitializeNewContext()
         {
             _model = new();
