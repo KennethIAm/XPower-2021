@@ -9,9 +9,9 @@ using XPowerClassLibrary.Device.Enums;
 using XPowerClassLibrary.Device.Models;
 using XPowerClassLibrary.Device.Services;
 
-namespace XPowerClassLibraryTests
+namespace XPowerClassLibrary.Tests
 {
-    public class DeviceService
+    public class DeviceServiceTest
     {
         private readonly string _deviceUniqueIdentifier = "UN1T-T3ST-40";
         private readonly string _ipAddress = "127.0.0.1";

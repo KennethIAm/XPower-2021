@@ -152,7 +152,7 @@ namespace XPowerClassLibrary.Tests
             // Arrange
             IUser createdUser;
             IUser requestedUser;
-            long randomNumber = new Random().Next(10000, 20000);
+            long randomNumber = new Random().Next(30000, 50000);
             string email = "testmail" + randomNumber + "@mail.com";
 
             createdUser = await this.userServiceDb.CreateUserAsync(email, "testUsername", "12341234!weqwe");
