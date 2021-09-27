@@ -5,7 +5,7 @@ using XPowerClassLibrary.Users.Models;
 using System.Data;
 using System.Threading.Tasks;
 
-namespace XPowerClassLibraryTests.Tests
+namespace XPowerClassLibrary.Tests
 {
     public class UserServiceDBTests
     {

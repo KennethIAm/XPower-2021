@@ -34,7 +34,6 @@ namespace XPowerClassLibrary.Validator
                     new MaxLengthRule(250),
                     new NoSqlInjectionRule()
                 };
-
         static private List<IValidationRule> refreshTokenRules = new List<IValidationRule>()
                 {
                     new NullRule(),
@@ -43,6 +42,15 @@ namespace XPowerClassLibrary.Validator
                     new MinLengthRule(50),
                     new MaxLengthRule(500)
                 };
+        private static List<IValidationRule> _iPAddressRules = new List<IValidationRule>
+        {
+            new NullRule(),
+            new NoEmptyStringRule(),
+            new NoSpacesRule(),
+            new MaxLengthRule(15),
+            new MinLengthRule(7),
+            new ValidIPAddressRule()
+        };
 
 
         static private List<IValidationRule> deviceNameRules = new List<IValidationRule>()
@@ -140,6 +148,19 @@ namespace XPowerClassLibrary.Validator
             }
         }
 
+        public static void ValidateIPaddressException(string iPAddress)
+        {
+            Validator validator = new Validator("IPAddress", _iPAddressRules);
+
+            if (!validator.Validate(iPAddress))
+            {
+                foreach (var ex in validator.GetExceptions())
+                {
+                    throw ex;
+                }
+            }
+        }
+
         /// <summary>
         /// Validates the mail.
         /// </summary>
@@ -149,6 +170,13 @@ namespace XPowerClassLibrary.Validator
         {
             Validator validator = new Validator("Mail", mailRules);
             validator.Validate(mail);
+            return validator.GetErrors();
+        }
+
+        public static List<string> ValidIPAddress(string iPAddress)
+        {
+            Validator validator = new Validator("IPAddress", _iPAddressRules);
+            validator.Validate(iPAddress);
             return validator.GetErrors();
         }
 
