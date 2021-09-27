@@ -1,17 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using XPowerClassLibrary.Device.Models;
 using XPowerClassLibrary.Device.Models.Requests;
 using XPowerClassLibrary.Device.Services;
-using XPowerClassLibrary.Validator;
 
 namespace XPowerAPI.Controllers
 {
@@ -29,7 +26,7 @@ namespace XPowerAPI.Controllers
             _clientFactory = clientFactory;
         }
 
-        [HttpPost()]
+        [HttpPost("CreateDevice")]
         public async Task<IActionResult> CreateDevice([FromBody] CreateDeviceRequest request)
         {
             try
@@ -113,17 +110,16 @@ namespace XPowerAPI.Controllers
         }
 
         [HttpGet("mine")]
-        public async Task<IActionResult> GetUsersDevices([FromBody] UserDevicesRequest devicesRequest)
+        public async Task<IActionResult> GetUsersDevices()
         {
             try
             {
-                if (devicesRequest is null)
-                    return BadRequest(GenerateExceptionMessage("Invalid data."));
+                var token = GetCurrentUserToken();
 
-                if (string.IsNullOrEmpty(devicesRequest.RefreshToken))
+                if (UsingInvalidRefreshToken())
                     return BadRequest(GenerateExceptionMessage("Couldn't authorize request. Invalid token."));
 
-                var usersDevices = await _deviceService.GetUsersOwnedDevices(devicesRequest);
+                var usersDevices = await _deviceService.GetUsersOwnedDevices(new UserDevicesRequest { RefreshToken = token });
 
                 if (usersDevices is null)
                     return NotFound(GenerateExceptionMessage("Couldn't find any owned devices."));
@@ -179,9 +175,13 @@ namespace XPowerAPI.Controllers
                 var uri = new Uri($"http://{ipAddress}");
                 var response = await _clientFactory.CreateClient().GetAsync($"{uri}?{command}", HttpCompletionOption.ResponseHeadersRead);
 
-                if (response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode) 
                 {
-                    return Ok();
+                    var data = await response.Content.ReadAsStringAsync();
+
+                    var powerData = JsonSerializer.Deserialize<PowerUsageModel>(data);
+
+                    return Ok(powerData);
                 }
 
                 return NotFound(GenerateExceptionMessage("Command not found."));
@@ -208,7 +208,7 @@ namespace XPowerAPI.Controllers
                     return BadRequest(GenerateExceptionMessage("Invalid Device Update Request."));
                 }
 
-                if (UsingValidIpAddress(updateRequest.DeviceIpAddress))
+                if (!UsingValidIpAddress(updateRequest.DeviceIpAddress))
                 {
                     return BadRequest(GenerateExceptionMessage("Invalid Device Update Request, IPAddress not readable."));
                 }
@@ -247,10 +247,8 @@ namespace XPowerAPI.Controllers
             {
                 if (assignDeviceRequest is null)
                     return BadRequest(GenerateExceptionMessage("Invalid Data Given."));
-
                 if (string.IsNullOrEmpty(assignDeviceRequest.UserTokenRequest) || string.IsNullOrEmpty(assignDeviceRequest.UniqueDeviceIdentifier))
                     return NotFound(GenerateExceptionMessage("Data couldn't be found."));
-
                 IDevice assignedDevice = await _deviceService.AssignDeviceToUserAsync(assignDeviceRequest);
 
                 if (assignedDevice is null)

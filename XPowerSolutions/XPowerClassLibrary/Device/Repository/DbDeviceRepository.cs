@@ -30,8 +30,7 @@ namespace XPowerClassLibrary.Device.Repository
                 {
                     @UserTokenRequest = assignDeviceRequest.UserTokenRequest,
                     @UniqueDeviceIdentifier = assignDeviceRequest.UniqueDeviceIdentifier,
-                    @DeviceName = assignDeviceRequest.DeviceName,
-                    @DeviceTypeId = assignDeviceRequest.DeviceTypeId
+                    @DeviceName = assignDeviceRequest.DeviceName
                 };
 
                 assignedDeviceId = await conn.ExecuteScalarAsync<int>(proc, values, commandType: CommandType.StoredProcedure);
@@ -76,11 +75,12 @@ namespace XPowerClassLibrary.Device.Repository
 
             if (GreaterThanZero(entityId))
             {
-                using (var conn = DeviceServiceFactory.GetSqlConnectionBasicReader())
+                using (var conn = DeviceServiceFactory.GetSqlConnectionComplexSelect())
                 {
                     await conn.OpenAsync();
 
-                    device = await conn.GetAsync<DeviceInformationView>(entityId);
+                    //device = await conn.GetAsync<DeviceInformationView>(entityId);
+                    device = await conn.QuerySingleOrDefaultAsync<DeviceInformationView>("SELECT * FROM DeviceInformationView WHERE DeviceID = @DeviceID", new { @DeviceID = entityId });
                 }
             }
 

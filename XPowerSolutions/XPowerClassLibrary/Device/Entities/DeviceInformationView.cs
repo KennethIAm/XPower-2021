@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dapper.Contrib.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using XPowerClassLibrary.Device.Enums;
@@ -6,8 +7,10 @@ using XPowerClassLibrary.Device.Models;
 
 namespace XPowerClassLibrary.Device.Entities
 {
+    [Table("DeviceInformationView")]
     public class DeviceInformationView : IDevice
     {
+        [Key]
         private int DeviceId { get; set; }
         private int DeviceTypeId { get; set; }
         private string DeviceTypeName { get; set; }
