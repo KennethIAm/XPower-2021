@@ -5,24 +5,27 @@
     <br />
     @if (UserDevice is not null)
     {
-        <div style="padding-left: 20px; padding-right: 20px; max-width: 700px; align-self: center; width:100%;">
-            @if (UserDevice.DeviceType.Id == 1)
-            {
-                <span class="fas fa-question-circle text-light" style="text-align:center; font-size:100px; margin-bottom: 10px;"></span>
-            }
-            else if (UserDevice.DeviceType.Id == 2)
-            {
-                <span class="fas fa-lightbulb text-light" style="align-self: center;font-size:100px; margin-bottom: 10px;"></span>
-            }
-            else if (UserDevice.DeviceType.Id == 3)
-            {
-                <span class="fas fa-door-open text-light" style="align-self:center; font-size:100px; margin-bottom: 10px;"></span>
-            }
-            else if (UserDevice.DeviceType.Id == 4)
-            {
-                <span class="fas fa-fan text-light" style="align-self:center; font-size:100px; margin-bottom: 10px;"></span>
-            }
-            <h3 class="text-dark text-center text-light">@UserDevice.Name</h3>
+        <div style="padding-left: 20px; padding-right: 20px; max-width: 700px; align-self: center; width:100%; ">
+            <div style="text-align:center">
+                @if (UserDevice.DeviceType.Id == 1)
+                {
+                    <span class="fas fa-question-circle text-light" style="text-align:center; font-size:100px; margin-bottom: 10px;"></span>
+                }
+                else if (UserDevice.DeviceType.Id == 2)
+                {
+                    <span class="fas fa-lightbulb text-light" style="align-self: center;font-size:100px; margin-bottom: 10px;"></span>
+                }
+                else if (UserDevice.DeviceType.Id == 3)
+                {
+                    <span class="fas fa-door-open text-light" style="align-self:center; font-size:100px; margin-bottom: 10px;"></span>
+                }
+                else if (UserDevice.DeviceType.Id == 4)
+                {
+                    <span class="fas fa-fan text-light" style="align-self:center; font-size:100px; margin-bottom: 10px;"></span>
+                }
+                <h3 class="text-dark text-center text-light">@UserDevice.Name</h3>
+            </div>
+           
 
             @if (CurrentUsage.HasReturnInfo == true)
             {

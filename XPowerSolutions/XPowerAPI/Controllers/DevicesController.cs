@@ -173,7 +173,9 @@ namespace XPowerAPI.Controllers
             try
             {
                 var uri = new Uri($"http://{ipAddress}");
-                var response = await _clientFactory.CreateClient().GetAsync($"{uri}?{command}", HttpCompletionOption.ResponseHeadersRead);
+                var client = _clientFactory.CreateClient();
+                client.Timeout = TimeSpan.FromSeconds(20);
+                var response = await client.GetAsync($"{uri}?{command}", HttpCompletionOption.ResponseHeadersRead);
 
                 if (response.IsSuccessStatusCode) 
                 {
