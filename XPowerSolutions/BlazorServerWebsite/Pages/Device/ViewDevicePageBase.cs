@@ -220,6 +220,7 @@ namespace BlazorServerWebsite.Pages.Device
                         if (response.IsSuccessStatusCode)
                         {
                             Console.WriteLine("Device retrieved!");
+                            CurrentUsage = await response.Content.ReadAsAsync<CurrentUsageObject>();
                         }
                         else
                         {
