@@ -1,10 +1,10 @@
 ## Projekt: XPower - 2021
 
 #### Deltagere: 
-	- Benjamin Tikki Olsen
+	- Benjamin Tikki Olsen 
 	- Kenneth Christian Mohr
 	- Johan Borregaard Draaby
-	- Tobias Rosenvinge Hammer
+	- Tobias Rosenvinge Hammer (@iZeQure)
 
 ##### Afleveringsdato: 
 	30/09-2021
