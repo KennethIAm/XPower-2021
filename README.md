@@ -20,21 +20,22 @@
 > Link til sourcecode (GitHub): https://github.com/KennethIAm/XPower-2021/
 	
 ##### Afleveringen indeholder følgende rapporter, fundet i mappens rod:
-- Procesrapport: 		
-	- XPower - Procesrapport.pdf
-		- Her dokumenteres projekt processen.
+- Indhold
+  - Procesrapport: 		
+	XPower - Procesrapport.pdf
+    - Her dokumenteres projekt processen.
 	
-	- Produktrapport:		
+  - Produktrapport:		
 	XPower - Produktrapport.pdf
-		- Denne rapport dokumenterer det tilhørende produkt.
+    - Denne rapport dokumenterer det tilhørende produkt.
 	
-	- Kravspecifikation:
+  - Kravspecifikation:
 	XPower - FURPS+.pdf
-		- Her dokumenteres de krav der er opstillet, ved slutningen af for-analysen
+    - Her dokumenteres de krav der er opstillet, ved slutningen af for-analysen
 	
-	- Testrapport:		
+  - Testrapport:		
 	XPower - Testrapport.pdf
-		- Her dokumenteres UAT, Usabilty, og performance test af produktet
+    - Her dokumenteres UAT, Usabilty, og performance test af produktet
 
 - Bilag:
   - Bilag til Procesrapport kan findes i mappen: Bilag - Procesrapport
