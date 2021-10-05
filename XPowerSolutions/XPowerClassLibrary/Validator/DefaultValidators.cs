@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -23,7 +24,8 @@ namespace XPowerClassLibrary.Validator
                     new NoEmptyStringRule(),
                     new MinLengthRule(8),
                     new MaxLengthRule(64),
-                    new PasswordBlackListRule()
+                    new PasswordBlackListRule(),
+                    new NoSqlInjectionRule()
                 };
         static private List<IValidationRule> usernameRules = new List<IValidationRule>()
                 {
@@ -43,14 +45,14 @@ namespace XPowerClassLibrary.Validator
                     new MaxLengthRule(500)
                 };
         private static List<IValidationRule> _iPAddressRules = new List<IValidationRule>
-        {
-            new NullRule(),
-            new NoEmptyStringRule(),
-            new NoSpacesRule(),
-            new MaxLengthRule(15),
-            new MinLengthRule(7),
-            new ValidIPAddressRule()
-        };
+                {
+                    new NullRule(),
+                    new NoEmptyStringRule(),
+                    new NoSpacesRule(),
+                    new MaxLengthRule(15),
+                    new MinLengthRule(7),
+                    new ValidIPAddressRule()
+                };
 
 
         static private List<IValidationRule> deviceNameRules = new List<IValidationRule>()
@@ -104,7 +106,7 @@ namespace XPowerClassLibrary.Validator
         /// <param name="password">password value to validate.</param>
         static public void ValidatePasswordException(string password)
         {
-            Validator validator = new Validator("Password", passwordRules);
+            Validator validator = new Validator("Password", DefaultValidators.passwordRules);
             if (!validator.Validate(password))
             {
                 foreach (var exception in validator.GetExceptions())
